@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { hostname } from "../../config";
-import { toast } from "react-toastify";
 
 const token = localStorage.getItem("token");
 //create action
@@ -134,6 +133,27 @@ export const fetchUserById = createAsyncThunk(
   }
 );
 
+export const getProf = createAsyncThunk(
+  "getProf",
+  async (arg, { rejectWithValue }) => {
+    const response = await fetch(`${hostname}/adminuser/get-profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    try {
+      const result = await response.json();
+      console.log(result);
+      return result;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
 //verify OTP action
 export const verifyOTP = createAsyncThunk(
   "verifyOTP",
@@ -211,20 +231,18 @@ export const forgotPassword = createAsyncThunk(
 export const resetPassword = createAsyncThunk(
   "resetPassword",
   async (data, { rejectWithValue }) => {
-
     try {
-    console.log("set-password data", data);
-    const response = await fetch(
-      `${hostname}/auth/set-password?email=${data.email}&newPassword=${data.newPassword}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+      console.log("set-password data", data);
+      const response = await fetch(
+        `${hostname}/auth/set-password?email=${data.email}&newPassword=${data.newPassword}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-   
       const result = await response.json();
       return result;
     } catch (error) {
@@ -234,15 +252,15 @@ export const resetPassword = createAsyncThunk(
 );
 
 export const userDetail = createSlice({
-  name: "userDetail",
+  name: "app",
   initialState: {
     users: [],
     loading: false,
     error: null,
     user: "",
-    message: "",
     searchData: [],
-    message: null
+    message: null,
+    currentUser: null,
   },
 
   reducers: {
@@ -297,12 +315,26 @@ export const userDetail = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.loading = false;
         state.users = state.users.map((ele) =>
-          ele.id == action.payload.id ? action.payload : ele
+          ele.id === action.payload.id ? action.payload : ele
         );
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message;
+      })
+      .addCase(getProf.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getProf.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentUser = action.payload.ourUsers;
+        if(action.payload.ourUsers){
+        localStorage.setItem("id", action.payload.ourUsers?.id);
+        }
+      })
+      .addCase(getProf.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       .addCase(verifyOTP.pending, (state) => {
         state.loading = true;

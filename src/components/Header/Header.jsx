@@ -1,7 +1,13 @@
 import React, { useRef, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  useNavigate,
+  LinkContainer,
+  useLocation,
+} from "react-router-dom";
 import { motion } from "framer-motion";
-import logo from "../../assets/images/LOGO.png";
+import logo from "../../assets/images/logo.png";
 import userIcon from "../../assets/images/user-icon.png";
 import { Container, Row } from "reactstrap";
 import "./header.css";
@@ -10,7 +16,6 @@ import { Navbar, NavDropdown } from "react-bootstrap";
 import { UserAuth } from "../../context/AuthContext";
 
 import { logout } from "../../redux/slices/AuthSlice";
-import { showCart } from "../../redux/slices/CartSlice";
 
 const nav_links = [
   {
@@ -29,9 +34,11 @@ const nav_links = [
 ];
 
 const Header = () => {
-  const headerRef = useRef(null);
-  const menuRef = useRef(null);
+  const location = useLocation();
+  const headerRef = useRef();
+  const menuRef = useRef();
   const { totalItem } = useSelector((state) => state.cart);
+  const { wishlist, count } = useSelector((state) => state.wishlist);
 
   const stickyHeaderFunc = () => {
     window.addEventListener("scroll", () => {
@@ -39,14 +46,20 @@ const Header = () => {
         document.body.scrollTop > 80 ||
         document.documentElement.scrollTop > 80
       ) {
-        headerRef.current.classList.add("sticky_header");
+        if (headerRef.current) {
+          headerRef.current.classList.add("sticky_header");
+        }
       } else {
-        headerRef.current.classList.remove("sticky_header");
+        if (headerRef.current) {
+          headerRef.current.classList.remove("sticky_header");
+        }
       }
     });
   };
 
   const { userInfo } = useSelector((state) => state.auth);
+  const { currentUser } = useSelector((state) => state.app);
+
   const { user, logOut } = UserAuth();
 
   const dispatch = useDispatch();
@@ -71,12 +84,15 @@ const Header = () => {
     }
   };
 
+  const handleOrders = () => {
+    navigate("/account/order");
+  };
+
   useEffect(() => {
     stickyHeaderFunc();
-    dispatch(showCart());
 
     return () => window.removeEventListener("scroll", stickyHeaderFunc);
-  },[]);
+  }, []);
 
   const menuToggle = () => menuRef.current.classList.toggle("active_menu");
 
@@ -111,31 +127,60 @@ const Header = () => {
             {userInfo || user?.displayName ? (
               <div className="nav_icons">
                 <span className="fav_icon">
-                  <i className="ri-heart-line"></i>
-                  <span className="badge">2</span>
+                  <Link
+                    to="/wishlist"
+                    className={`icon-link items-center justify-center`}
+                  >
+                    <i className="ri-heart-line"></i>
+                    <span className="badge">{count} </span>
+                  </Link>
                 </span>
                 <span className="cart_icon">
-                  <i className="ri-shopping-bag-line"></i>
-                  <span className="badge">{totalItem}</span>
+                  <Link
+                    to="/cart"
+                    className={`icon-link items-center justify-center`}
+                  >
+                    <i className="ri-shopping-bag-line"></i>
+                    <span className="badge">{totalItem}</span>
+                  </Link>
                 </span>
                 <span>
-                  <motion.img
-                    whileTap={{ scale: 1.1 }}
-                    src={userIcon}
-                    alt="user"
-                  />
+                  <Link
+                    to="/account"
+                    className={`icon-link items-center justify-center`}
+                  >
+                    {currentUser && currentUser.image ? (
+                      <motion.img
+                        whileTap={{ scale: 1.1 }}
+                        src={currentUser && currentUser.image}
+                        alt="user"
+                      />
+                    ) : (
+                      <motion.img
+                        whileTap={{ scale: 1.1 }}
+                        src={userIcon}
+                        alt="user"
+                      />
+                    )}
+                  </Link>
                 </span>
 
-                <NavDropdown title={userInfo?.name} id="username">
-                  {/* <LinkContainer to="/profile">
-                      <NavDropdown.Item>Profile</NavDropdown.Item>
-                    </LinkContainer> */}
+                {/* <NavDropdown title={userInfo?.name} id="username">
+                  <NavLink to="/profile">
+                    <NavDropdown.Item>Profile</NavDropdown.Item>
+                  </NavLink>
+
+                  <NavLink to="/login">
+                    <NavDropdown.Item onClick={handleOrders}>
+                      My Orders
+                    </NavDropdown.Item>
+                  </NavLink>
                   <NavLink to="/login">
                     <NavDropdown.Item onClick={handleLogout}>
                       Logout
                     </NavDropdown.Item>
                   </NavLink>
-                </NavDropdown>
+                </NavDropdown> */}
 
                 <div className="mobile_menu">
                   <span onClick={menuToggle}>

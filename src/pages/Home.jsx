@@ -17,61 +17,47 @@ import Clock from "../components/UI/Clock";
 import { showProduct } from "../redux/slices/ProductSlice";
 
 const Home = () => {
-  const [trendingProducts, setTrendingProducts] = useState([]);
-  const [bestSalesProducts, setBestSalesProducts] = useState([]);
-  const [mobileProducts, setMobileProducts] = useState([]);
-  const [wirelessProducts, setWirelessProducts] = useState([]);
-  const [popularProducts, setPopularProducts] = useState([]);
-  const [searchData, setSearchData] = useState("");
+  // const [trendingProducts, setTrendingProducts] = useState([]);
+  // const [bestSalesProducts, setBestSalesProducts] = useState([]);
+  // const [hillProducts, setHillProducts] = useState([]);
+  // const [popularProducts, setPopularProducts] = useState([]);
 
   const year = new Date().getFullYear();
 
-  // const [fetchProducts, {isLoading, isSuccess, error, isFetching} ] = useFetchProductsMutation();
-
-  const { products, loading } = useSelector((state) => state.product);
-
+  const { products, fruitProducts, hillProducts, fertilizerProducts, loading } =
+    useSelector((state) => state.product);
 
   const dispatch = useDispatch();
-
+  console.log(products);
   useEffect(() => {
+    dispatch(showProduct());
 
-    
-    dispatch(showProduct(searchData));
-   
-    const filterdTrendingProducts = products;
+    // setTrendingProducts(products);
+    // // const filterdTrendingProducts = products.length > 0 ? products : trendingProducts;
 
-    const filterdBestSalesProducts = products;
-    // .filter(
-    //   (item) => item.category.name === "fruit"
+    // const filterdBestSalesProducts = products?.filter(
+    //   (item) => item.category.name === "Fruit"
     // );
 
-    const filterdMobileProducts = products;
-    // .filter(
-    //   (item) => item.category === "mobile"
+    // setBestSalesProducts(filterdBestSalesProducts);
+
+    // const filterdHillProducts = products?.filter(
+    //   (item) => item.category.name === "Hill produce"
     // );
 
-    const filterdWirelessProducts = products;
-    // .filter(
-    //   (item) => item.category === "wireless"
+    // setHillProducts(filterdHillProducts);
+
+    // const filterdPopularProducts = products?.filter(
+    //   (item) => item.category.name === "Fertilizer"
     // );
 
-    const filterdPopularProducts = products;
-    // .filter(
-    //   (item) => item.category === "watch"
-    // );
-
-    setTrendingProducts(filterdTrendingProducts);
-    setBestSalesProducts(filterdBestSalesProducts);
-    setMobileProducts(filterdMobileProducts);
-    setWirelessProducts(filterdWirelessProducts);
-    setPopularProducts(filterdPopularProducts);
-  }, []);
+    // setPopularProducts(filterdPopularProducts);
+  }, [dispatch]);
 
   if (loading) {
     return <h2>Loading</h2>;
   }
 
-     
   return (
     <>
       <Helmet title={"Home"}>
@@ -109,7 +95,11 @@ const Home = () => {
               <Col lg="12" className="text-center mb-1">
                 <h2 className="section_title">Trending Products</h2>
               </Col>
-              <ProductsList data={products} />
+              {products && products?.length === 0 ? (
+                <h1 className="text-center fs-4">No products are found!</h1>
+              ) : (
+                <ProductsList data={products && products} />
+              )}
             </Row>
           </Container>
         </section>
@@ -119,7 +109,11 @@ const Home = () => {
               <Col lg="12" className="text-center mb-1">
                 <h2 className="section_title">Best Sales</h2>
               </Col>
-              <ProductsList data={products} />
+              {products && products?.length === 0 ? (
+                <h1 className="text-center fs-4">No products are found!</h1>
+              ) : (
+                <ProductsList data={products && products} />
+              )}
             </Row>
           </Container>
         </section>
@@ -151,8 +145,11 @@ const Home = () => {
               <Col lg="12" className="text-center mb-1">
                 <h2 className="section_title">New Arrivals</h2>
               </Col>
-              <ProductsList data={products} />
-              {/* <ProductsList data={wirelessProducts} /> */}
+              {products?.length === 0 ? (
+                <h1 className="text-center fs-4">No products are found!</h1>
+              ) : (
+                <ProductsList data={products && products} />
+              )}
             </Row>
           </Container>
         </section>
@@ -162,7 +159,12 @@ const Home = () => {
               <Col lg="12" className="text-center mb-1">
                 <h2 className="section_title">Popular in Category</h2>
               </Col>
-              <ProductsList data={products} />
+
+              {products?.length === 0 ? (
+                <h1 className="text-center fs-4">No products are found!</h1>
+              ) : (
+                <ProductsList data={products && products} />
+              )}
             </Row>
           </Container>
         </section>

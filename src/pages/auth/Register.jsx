@@ -73,7 +73,7 @@ const Register = () => {
 
         if (error === Number(409)) {
           setValError("User with email already exists !!!");
-        } else if (Object.is(message, null)){
+        } else if (!Object.is(message, null)) {
           toast.success("User registered successfully, verify otp");
           navigate("/verifyotp");
         } else {
@@ -203,6 +203,15 @@ const Register = () => {
           <Form.Control.Feedback type="invalid">
             Please upload an image.
           </Form.Control.Feedback>
+
+          <br />
+          {image && (
+            <div>
+              <div>
+                <img src={image} width="50px" height="50px" />
+              </div>
+            </div>
+          )}
         </Form.Group>
 
         <Button type="submit" variant="primary" className="mt-3">

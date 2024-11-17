@@ -1,10 +1,10 @@
 import React from "react";
-import { Button } from "react-bootstrap";
+import { Button } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { updateCartItem, removeCartItem } from "../../redux/slices/CartSlice";
-// import { IconButton } from "@mui/material";
-// import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-// import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import { IconButton } from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
 const CartItem = ({ item, showButton }) => {
   const dispatch = useDispatch();
@@ -15,7 +15,7 @@ const CartItem = ({ item, showButton }) => {
   };
   const handleUpdateCartItem = (num) => {
     const data = {
-     quantity: item.quantity + num ,
+      quantity: item.quantity + num,
       cartItemId: item?.cartItemId,
     };
     dispatch(updateCartItem(data));
@@ -32,7 +32,7 @@ const CartItem = ({ item, showButton }) => {
         </div>
         <div className="ml-5 space-y-1">
           <p className="font-semibold">{item?.product?.name}</p>
-          {/* <p className="opacity-70">Size: {item?.size},White</p> */}
+          <p className="opacity-70">{item?.product?.category?.name}</p>
           {/* <p className="opacity-70 mt-2">Seller: {item?.product?.brand}</p> */}
           <div className="flex space-x-2 items-center pt-3">
             <p className="opacity-50 line-through">₹{item?.product.price}</p>
@@ -45,45 +45,36 @@ const CartItem = ({ item, showButton }) => {
           </div>
         </div>
       </div>
-      {showButton && (
+      {showButton &&
         <div className="lg:flex items-center lg:space-x-10 pt-4">
           <div className="flex items-center space-x-2 ">
-            <button
+            <IconButton
               onClick={() => handleUpdateCartItem(-1)}
               disabled={item?.quantity <= 1}
               color="primary"
               aria-label="add an alarm"
             >
-              <i className="fa fa-minus-circle" aria-hidden="true"></i>
-            </button>
-
+              <RemoveCircleOutlineIcon />
+            </IconButton>
             <span className="py-1 px-7 border rounded-sm">
               {item?.quantity}
             </span>
-            <button
+            <IconButton
+              disabled={item?.quantity >= 10}
               onClick={() => handleUpdateCartItem(1)}
               color="primary"
               aria-label="add an alarm"
             >
-              <i className="fa fa-plus-circle" aria-hidden="true"></i>
-            </button>
+              <AddCircleOutlineIcon />
+            </IconButton>
           </div>
-          <div className="flex text-sm lg:text-base mt-5 lg:mt-0">
-            <Button
-            className="buy_btn"
-              onClick={handleRemoveItemFromCart}
-              variant="text"
-              style={{
-                padding: ".8rem 2rem",
-                marginTop: "2rem",
-                width: "100%",
-              }}
-            >
+          <div className="flex text-sm lg:text-base lg:mt-0">
+            <Button onClick={handleRemoveItemFromCart} variant="text">
               Remove{" "}
             </Button>
           </div>
         </div>
-      )}
+      }
     </div>
   );
 };

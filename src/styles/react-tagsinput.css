@@ -1,0 +1,57 @@
+/* ReactTagsCustom.css */
+/* .ReactTags__tags {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f9f9f9;
+  height: 50px !important;
+} */
+
+.ReactTags__tags {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f9f9f9;
+  height: 40px !important;
+  margin-right: 10px;
+}
+.ReactTags__tagInput {
+  display: inline-block;
+  flex-grow: 1;
+}
+.ReactTags__selected{
+  display: flex;
+}
+.ReactTags__tagInput input {
+  width: 50px;
+  border: none;
+  outline: none;
+  padding: 5px;
+}
+.ReactTags__tag {
+  display: flex;
+  align-items: center;
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px;
+  margin: 2px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.ReactTags__remove {
+  margin-left: 5px;
+  cursor: pointer;
+  color: #ff0000;
+  background: none;
+  border: none;
+  font-size: 16px;
+  padding: 0;
+}
+.ReactTags__remove:hover {
+  color: #ff5555;
+}
