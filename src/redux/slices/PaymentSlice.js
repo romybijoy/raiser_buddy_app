@@ -10,7 +10,7 @@ export const createPayment = createAsyncThunk(
     console.log("data", data);
 
     try {
-      const response = await fetch(`${appConfig.ip}/payments/${data.orderId}`, {
+      const response = await fetch(`${appConfig.ip}/payments/${data.orderId}/${data.amount}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

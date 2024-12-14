@@ -85,7 +85,7 @@ export const validateCoupon = createAsyncThunk('validateCoupon', async (data, { 
   let response
   try {
     response = await fetch(
-      `${appConfig.ip}/coupon/${data.code[0].text}`,
+      `${appConfig.ip}/coupon/${data.code}`,
       {
         method: 'GET',
         headers: {
@@ -98,7 +98,7 @@ export const validateCoupon = createAsyncThunk('validateCoupon', async (data, { 
     // }
 
     const result = await response.json()
-    // console.log(result);
+    console.log(result);
     return result
   } catch (error) {
     return rejectWithValue(error)

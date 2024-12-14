@@ -19,12 +19,14 @@ const OrderSummary = () => {
   const { coupon } = useSelector((state) => state.coupon);
   const [couponCode, setCouponCode] = useState([]);
 
-  const [totalPrice, setTotalPrice] = useState(order?.totalDiscountedPrice);
+  const [totalPrice, setTotalPrice] = useState(0);
   useEffect(() => {
     const input = { orderId: Number(orderId) };
     dispatch(fetchOrderById(input));
     if (order?.totalPrice < 1000) {
       setTotalPrice(order?.totalDiscountedPrice + 40);
+    } else{
+    setTotalPrice(order?.totalDiscountedPrice);
     }
   }, [dispatch]);
 
@@ -34,7 +36,7 @@ const OrderSummary = () => {
 
   const handleCoupon = (e) => {
     e.preventDefault();
-
+    console.log(couponCode);
     dispatch(validateCoupon({ code: couponCode }));
   };
   return (
@@ -53,7 +55,7 @@ const OrderSummary = () => {
               ))}
           </div>
         </div>
-        <div className="sticky top-0 h-[100vh] mt-5 lg:mt-0 ml-5">
+        <div className="sticky top-0 h-[100vh] mt-0 lg:mt-0 ml-5">
           <div className="border p-5 bg-white shadow-lg rounded-md">
             <p className="font-bold opacity-60 pb-4">PRICE DETAILS</p>
             <hr />
@@ -77,39 +79,43 @@ const OrderSummary = () => {
                     <span className="text-green-700">40</span>
                   </span>
                 ) : (
-                  <span className="opacity-50">Free </span>
+                  <span className="flex space-x-2 items-center">
+                    <span className="opacity-50 line-through">40</span>
+                    <span className="text-green-700">Free </span>
+                  </span>
                 )}
               </div>
 
-              {/* <hr />
+              <hr />
               <p className="font-bold opacity-60 pb-2">Have a Coupon?</p>
-
-              <form className="flex">
-                <input
-                  style={{
-                    height: "100%",
-                    border: "2px solid black",
-                    width: "150px",
-                    padding: "6px",
-                    marginRight: "1px",
-                  }}
-                  placeholder="APPLY10"
-                  value={couponCode}
-                  onChange={({ target }) => {
-                    console.log(target.value)
-                    setCouponCode(target.value);
-                  }}
-                /> */}
-                {/* <TagInput
+              <div className="flex space-x-2 items-center">
+                <form>
+                  <input
+                    style={{
+                      height: "100%",
+                      border: "2px solid black",
+                      width: "150px",
+                      padding: "6px",
+                      marginRight: "1px",
+                    }}
+                    placeholder="APPLY10"
+                    value={couponCode}
+                    onChange={({ target }) => {
+                      setCouponCode(target.value);
+                    }}
+                  />
+                  {/* <span className="flex space-x-2 items-center">
+                <TagInput
                   tags={couponCode}
                   setTags={setCouponCode}
                   inputFieldPosition="bottom"
                 /> */}
-{/* 
-                <span className="buy_btn mx-1" onClick={handleCoupon}>
-                  Apply
-                </span>
-              </form> */}
+
+                  <span className="buy_btn mx-1" onClick={handleCoupon}>
+                    Apply
+                  </span>
+                </form>
+              </div>
               <hr />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total Amount</span>
@@ -117,7 +123,7 @@ const OrderSummary = () => {
                   {" "}
                   ₹{" "}
                   {coupon !== ""
-                    ? totalPrice * coupon?.discount * 0.01
+                    ? totalPrice * (coupon?.discount * 0.01)
                     : totalPrice}
                 </span>
               </div>

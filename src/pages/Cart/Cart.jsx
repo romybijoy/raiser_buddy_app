@@ -10,18 +10,21 @@ import CartEmptyScreen from "./CartEmptyScreen";
 
 const Cart = () => {
   const { cartData, loading } = useSelector((state) => state.cart);
-  const [totalPrice, setTotalPrice] = useState(cartData?.totalDiscountedPrice);
+  const [totalPrice, setTotalPrice] = useState(0);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(showCart());
     if (cartData?.totalPrice < 1000) {
-      setTotalPrice(cartData?.totalDiscountedPrice + 40);
-    } 
+      setTotalPrice((cartData?.totalDiscountedPrice) + 40);
+      console.log(totalPrice);
+    }
+    else{
+    setTotalPrice(cartData?.totalDiscountedPrice);
+    }
+    console.log(totalPrice);
   }, [dispatch]);
-
-  
 
   return (
     <Helmet title="Shop">
@@ -66,7 +69,10 @@ const Cart = () => {
                         <span className="text-green-700">40</span>
                       </span>
                     ) : (
-                      <span className="opacity-50">Free </span>
+                      <span className="flex space-x-2 items-center">
+                        <span className="opacity-50 line-through">40</span>
+                        <span className="text-green-700">Free </span>
+                      </span>
                     )}
                   </div>
                   <hr />
