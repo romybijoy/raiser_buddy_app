@@ -7,15 +7,18 @@ import { useLoginMutation } from "../../redux/slices/UsersApiSlice";
 import { setCredentials } from "../../redux/slices/AuthSlice";
 import { toast } from "react-toastify";
 import Loader from "../../components/Loader/Loader";
-import { FacebookLoginButton, GoogleLoginButton } from "react-social-login-buttons";
+import {
+  FacebookLoginButton,
+  GoogleLoginButton,
+} from "react-social-login-buttons";
 
 import { UserAuth } from "../../context/AuthContext";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [validated, setValidated] = useState(false)
-  const [error, setError] = useState('');
+  const [validated, setValidated] = useState(false);
+  const [error, setError] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -23,48 +26,50 @@ const LoginScreen = () => {
   const [login, { isLoading }] = useLoginMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
-  const role = localStorage.getItem('role')
+  const role = localStorage.getItem("role");
 
-  const { googleSignIn,  dbUserSignIn, user, facebookSignIn } = UserAuth();
+  const { googleSignIn, dbUserSignIn, user, facebookSignIn } = UserAuth();
 
   useEffect(() => {
-   
-    if (user ) {
-      navigate("/home");
-    }
-  }, [navigate,user]);
+    console.log(user);
+    // if (user) {
+    //   console.log(user);
+    //   navigate("/home");
+    // }
+  }, [navigate, user]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    const form = e.currentTarget
+    const form = e.currentTarget;
 
     if (form.checkValidity() === false) {
-      e.preventDefault()
-      e.stopPropagation()
-      setValidated(true)
+      e.preventDefault();
+      e.stopPropagation();
+      setValidated(true);
     }
     {
-    try {
-      dbUserSignIn();
-      const res = await login({ email, password }).unwrap();
-      dispatch(setCredentials({ ...res }));
-      if (role === 'ADMIN') {
-        setError('Invalid user credentials.')
-        return
+      try {
+        const res = await login({ email, password }).unwrap();
+        dispatch(setCredentials({ ...res }));
+        if (role === "ADMIN") {
+          setError("Invalid user credentials.");
+          return;
+        }
+        if (role === "USER") {
+          // dbUserSignIn();
+          navigate("/home");
+          toast.success("Login successfully");
+        }
+      } catch (err) {
+        setError(err?.data?.message || err.error);
       }
-      if (role === 'USER') {
-        navigate('/home')
-        toast.success('Login successfully')
-      }
-    } catch (err) {
-      setError(err?.data?.message || err.error)
     }
-  }
   };
 
   const handleGoogleSignIn = async () => {
     try {
       await googleSignIn();
+      navigate("/home");
     } catch (error) {
       console.log(error);
     }
@@ -73,6 +78,7 @@ const LoginScreen = () => {
   const handleFacebookSignIn = async () => {
     try {
       await facebookSignIn();
+      navigate("/home");
     } catch (error) {
       console.log(error);
     }
@@ -145,7 +151,7 @@ const LoginScreen = () => {
       </Row>
 
       <Row className="py-3 px-5">
-      <FacebookLoginButton onClick={handleFacebookSignIn}/>
+        <FacebookLoginButton onClick={handleFacebookSignIn} />
       </Row>
     </FormContainer>
   );

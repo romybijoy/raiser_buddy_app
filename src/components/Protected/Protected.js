@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 const Protected = ({ children }) => {
   const { user, dbUser } = UserAuth();
-  if (!user && !dbUser ) {
+  if (!user && !dbUser) {
     return <Navigate to="/home" />;
   }
 

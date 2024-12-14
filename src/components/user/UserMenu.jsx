@@ -8,6 +8,7 @@ import { UserAuth } from "../../context/AuthContext";
 
 import { logout } from "../../redux/slices/AuthSlice";
 
+
 const NavMenuWrapper = styled.nav`
   margin-top: 32px;
 
@@ -71,7 +72,7 @@ const NavMenuWrapper = styled.nav`
 const UserMenu = () => {
   const location = useLocation();
 
-  const { user, logOut } = UserAuth();
+  const { user, logOut, currentPath } = UserAuth();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const UserMenu = () => {
       "Are you sure you want to logout this user?"
     );
     if (confirmDelete) {
-      if (user != {}) {
+      if (user != null) {
         try {
           await logOut();
         } catch (error) {
@@ -97,18 +98,17 @@ const UserMenu = () => {
   const { currentUser } = useSelector((state) => state.app);
 
   return (
-    <div style={{width: "100%"}}>
+    <div style={{ width: "100%" }}>
       <Title titleText={currentUser && currentUser.name} />
       <p className="text-base font-light italic">Welcome to your account.</p>
 
       <NavMenuWrapper>
         <ul className="nav-menu-list grid">
-        <li className="nav-menu-item">
+          <li className="nav-menu-item">
             <Link
               to="/account"
               className={`nav-menu-link flex items-center ${
-                location.pathname === "/account" ||
-                location.pathname === "/account/add"
+                (window.location.pathname === "/account")
                   ? "active"
                   : ""
               }`}
@@ -125,8 +125,7 @@ const UserMenu = () => {
             <Link
               to="/account/order"
               className={`nav-menu-link flex items-center ${
-                location.pathname === "/account/order" ||
-                location.pathname === "/order_detail"
+                (window.location.pathname === "/account/order")
                   ? "active"
                   : ""
               }`}
@@ -135,7 +134,7 @@ const UserMenu = () => {
                 <img src="./assets/icons/ac_heart.svg" alt="" />
               </span>
               <span className="text-base font-semibold nav-link-text no-wrap">
-              My Orders
+                My Orders
               </span>
             </Link>
           </li>
@@ -144,10 +143,7 @@ const UserMenu = () => {
             <Link
               to="/wishlist"
               className={`nav-menu-link flex items-center ${
-                location.pathname === "/wishlist" ||
-                location.pathname === "/empty_wishlist"
-                  ? "active"
-                  : ""
+                window.location.pathname === "/wishlist" ? "active" : ""
               }`}
             >
               <span className="nav-link-icon flex items-center justify-center">
@@ -158,15 +154,12 @@ const UserMenu = () => {
               </span>
             </Link>
           </li>
-          
+
           <li className="nav-menu-item">
             <Link
               to="/coupons"
               className={`nav-menu-link flex items-center ${
-                location.pathname === "/coupons" ||
-                location.pathname === "/empty_wishlist"
-                  ? "active"
-                  : ""
+                window.location.pathname === "/coupons" ? "active" : ""
               }`}
             >
               <span className="nav-link-icon flex items-center justify-center">
@@ -181,9 +174,7 @@ const UserMenu = () => {
           <li className="nav-menu-item">
             <Link
               to="/forgotPassword"
-              className={`nav-menu-link flex items-center ${
-                location.pathname === "/forgotPassword" ? "active" : ""
-              }`}
+              className={`nav-menu-link flex items-center`}
             >
               <span className="nav-link-icon flex items-center justify-center">
                 <img src="./assets/icons/ac_user.svg" alt="" />
@@ -196,6 +187,7 @@ const UserMenu = () => {
 
           <li className="nav-menu-item">
             <Link
+              to=""
               onClick={handleLogout}
               className={`nav-menu-link flex items-center`}
             >

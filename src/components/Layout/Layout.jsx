@@ -4,7 +4,6 @@ import Footer from "../Footer/Footer";
 import Routers from "../../routers/Routers";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AuthContextProvider } from "../../context/AuthContext";
 
 import { getProf } from "../../redux/slices/UserSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,7 +14,7 @@ import { showWishlist } from "../../redux/slices/WishlistSlice";
 const Layout = () => {
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
-  
+
   useEffect(() => {
     dispatch(getProf());
     dispatch(showCart());
@@ -24,13 +23,11 @@ const Layout = () => {
 
   return (
     <>
-      <AuthContextProvider>
-        <Header />
-        <ToastContainer />
+      <Header />
+      <ToastContainer />
 
-        <Routers />
-        <Footer />
-      </AuthContextProvider>
+      <Routers />
+      <Footer />
     </>
   );
 };

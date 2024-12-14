@@ -27,7 +27,7 @@ const Routers = () => {
       <Route path="/" element={<Navigate to={"login"} />} />
 
       <Route path="home" element={<Home />} />
-      <Route path="login" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="signup" element={<Signup />} />
 
       <Route
@@ -39,23 +39,9 @@ const Routers = () => {
           </Protected>
         }
       />
-      <Route
-        path="shop"
-        element={
-          <Protected>
-            <Shop />
-          </Protected>
-        }
-      />
+      <Route path="shop" element={<Shop />} />
 
-      <Route
-        path="cart"
-        element={
-          <Protected>
-            <Cart />
-          </Protected>
-        }
-      />
+      <Route path="cart" element={<Cart />} />
       <Route
         path="/checkout"
         element={
@@ -65,7 +51,7 @@ const Routers = () => {
         }
       />
 
-<Route
+      <Route
         path="/coupons"
         element={
           <Protected>
@@ -74,7 +60,15 @@ const Routers = () => {
         }
       />
 
-      <Route exact path="/account/order" element={<Order />}></Route>
+      <Route
+        exact
+        path="/account/order"
+        element={
+          <Protected>
+            <Order />
+          </Protected>
+        }
+      ></Route>
       <Route
         exact
         path="/account/order/:orderId"
@@ -85,15 +79,46 @@ const Routers = () => {
         }
       ></Route>
 
-<Route path="/payment/:orderId" element={ <Protected><PaymentSuccess /></Protected>}></Route>
+      <Route
+        path="/payment/:orderId"
+        element={
+          <Protected>
+            <PaymentSuccess />
+          </Protected>
+        }
+      ></Route>
 
-      <Route path="/account/review/:productId" element={<RateProduct />}></Route>
+      <Route
+        path="/account/review/:productId"
+        element={<RateProduct />}
+      ></Route>
       <Route path="verifyotp" element={<VerifyOtp />} />
-      <Route path="forgotPassword" element={<ForgotPassword />} />
+      <Route path="/forgotPassword" element={<ForgotPassword />} />
       <Route path="set-Password" element={<ResetPassword />} />
-      <Route path="/wishlist" element={<WishList />} />
-      <Route path="/account" element={<Account />} />
-      <Route path="/account/add" element={<Address />} />
+      <Route
+        path="/wishlist"
+        element={
+          <Protected>
+            <WishList />
+          </Protected>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <Protected>
+            <Account />
+          </Protected>
+        }
+      />
+      <Route
+        path="/account/add"
+        element={
+          <Protected>
+            <Address />
+          </Protected>
+        }
+      />
     </Routes>
   );
 };

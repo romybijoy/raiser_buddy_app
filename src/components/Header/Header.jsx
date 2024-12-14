@@ -71,7 +71,7 @@ const Header = () => {
       "Are you sure you want to logout this user?"
     );
     if (confirmDelete) {
-      if (user != {}) {
+      if (user) {
         try {
           await logOut();
         } catch (error) {
