@@ -17,20 +17,14 @@ const WishListScreenWrapper = styled.main`
   }
 `;
 
-
-
 const breadcrumbItems = [
   { label: "Home", link: "/" },
   { label: "Wishlist", link: "/wishlist" },
 ];
 
-
-
 const WishListScreen = () => {
-
   const { wishlist } = useSelector((state) => state.wishlist);
-
-
+  console.log(wishlist) ; 
   return (
     <WishListScreenWrapper className="page-py-spacing">
       <Container>
@@ -40,13 +34,11 @@ const WishListScreen = () => {
           <UserContent>
             <Title titleText={"Wishlist"} />
             <div className="wishlist grid">
-              {wishlist.length === 0 ? (
+              {wishlist?.length === 0 ? (
                 <WishListEmptyScreen />
               ) : (
                 wishlist?.map((wishlist) => {
-                  return (
-                   <WishlistCard wishlist={wishlist}/>
-                  );
+                  return <WishlistCard wishlist={wishlist} />;
                 })
               )}
             </div>

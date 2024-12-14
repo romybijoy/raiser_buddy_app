@@ -81,11 +81,11 @@ const OrderSummary = () => {
                 )}
               </div>
 
-              <hr />
+              {/* <hr />
               <p className="font-bold opacity-60 pb-2">Have a Coupon?</p>
 
               <form className="flex">
-                {/* <input
+                <input
                   style={{
                     height: "100%",
                     border: "2px solid black",
@@ -96,19 +96,20 @@ const OrderSummary = () => {
                   placeholder="APPLY10"
                   value={couponCode}
                   onChange={({ target }) => {
+                    console.log(target.value)
                     setCouponCode(target.value);
                   }}
                 /> */}
-                <TagInput
+                {/* <TagInput
                   tags={couponCode}
                   setTags={setCouponCode}
                   inputFieldPosition="bottom"
-                />
-
+                /> */}
+{/* 
                 <span className="buy_btn mx-1" onClick={handleCoupon}>
                   Apply
                 </span>
-              </form>
+              </form> */}
               <hr />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total Amount</span>

@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import { Container } from "../../styles/styles";
-import Breadcrumb from "../../components/common/Breadcrumb";
 import { UserContent, UserDashboardWrapper } from "../../styles/user";
 import UserMenu from "../../components/user/UserMenu";
 import { staticImages } from "../../utils/images";

@@ -95,11 +95,11 @@ const Order = () => {
                 <Grid item xs={9}>
                   <Box className="space-y-5 ">
                     {orders?.length > 0 &&
-                      orders?.map((order, index) => {
-                        return order?.orderItems?.map((item) => (
-                          <OrderCard item={item} order={order} key={index} />
-                        ));
-                      })}
+                      orders.flatMap((order) =>
+                        order?.orderItems?.map((item, i) => (
+                          <OrderCard item={item} order={order} key={i} />
+                        ))
+                      )}
                   </Box>
                 </Grid>
               </Grid>

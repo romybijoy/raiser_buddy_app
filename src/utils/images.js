@@ -9,16 +9,7 @@ import heart from "../assets/icons/heart.svg";
 import user from "../assets/icons/user.svg";
 import cart from "../assets/icons/cart.svg";
 
-// some random images
-import img1 from "../assets/images/img1.jpg";
-import img2 from "../assets/images/img2.jpg";
 
-
-// testimonials images
-import test1 from "../assets/images/test1.png";
-import test2 from "../assets/images/test2.png";
-import test3 from "../assets/images/test3.png";
-import test4 from "../assets/images/test4.png";
 
 // colors images
 import color1 from "../assets/images/color1.svg";
@@ -34,8 +25,6 @@ import color10 from "../assets/images/color10.svg";
 import color11 from "../assets/images/color11.svg";
 import color12 from "../assets/images/color1.svg";
 
-// product details preview images
-import preview_main from "../assets/images/preview_main.jpg";
 
 // product services images
 import card_icon from "../assets/icons/card_icon.svg";
@@ -51,9 +40,6 @@ import play_icon from "../assets/icons/play_icon.svg";
 import page_not_found from "../assets/images/page_not_found.png";
 import empty_cart_img from "../assets/images/empty_cart_img.svg";
 
-// order
-import order1 from "../assets/images/order1.png";
-import order2 from "../assets/images/order2.png";
 
 // wishlist
 import green_heart from "../assets/icons/green_heart.svg";
@@ -74,12 +60,6 @@ export const staticImages = {
   heart,
   user,
   cart,
-  img1,
-  img2,
-  test1,
-  test2,
-  test3,
-  test4,
   color1,
   color2,
   color3,
@@ -92,7 +72,6 @@ export const staticImages = {
   color10,
   color11,
   color12,
-  preview_main,
   card_icon,
   size_icon,
   shipping_icon,
@@ -100,8 +79,6 @@ export const staticImages = {
   play_icon,
   page_not_found,
   empty_cart_img,
-  order1,
-  order2,
   green_heart,
   googlePay,
   visa,
