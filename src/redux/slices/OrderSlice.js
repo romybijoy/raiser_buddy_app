@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { hostname } from "../../config";
+import { appConfig } from "../../config";
 
 const email = localStorage.getItem("email");
 const token = localStorage.getItem("token");
@@ -10,7 +10,7 @@ export const createOrder = createAsyncThunk(
     console.log("data", data);
 
     try {
-      const response = await fetch(`${hostname}/orders/${email}`, {
+      const response = await fetch(`${appConfig.ip}/orders/${email}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +44,7 @@ export const createAddress = createAsyncThunk(
     console.log("data", data);
 
     try {
-      const response = await fetch(`${hostname}/orders/address/${email}`, {
+      const response = await fetch(`${appConfig.ip}/orders/address/${email}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,7 +74,7 @@ export const showOrder = createAsyncThunk(
     let response;
 
     response = await fetch(
-      `${hostname}/order?pageNumber=${data.page}&pageSize=${data.pageSize}`,
+      `${appConfig.ip}/order?pageNumber=${data.page}&pageSize=${data.pageSize}`,
       {
         method: "GET",
         headers: {
@@ -97,7 +97,7 @@ export const codOrder = createAsyncThunk(
   'codOrder',
   async (data, { rejectWithValue, dispatch }) => {
     console.log(data.id)
-    const response = await fetch(`${hostname}/orders/cod/${data.id}`, {
+    const response = await fetch(`${appConfig.ip}/orders/cod/${data.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ export const getOrderHistory = createAsyncThunk(
     let response;
     console.log("dsdsfsfs", email);
     try {
-      response = await fetch(`${hostname}/orders/user/${email}`, {
+      response = await fetch(`${appConfig.ip}/orders/user/${email}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -146,7 +146,7 @@ export const fetchOrderById = createAsyncThunk(
   "fetchOrderById",
   async (data, { rejectWithValue }) => {
     console.log(data);
-    const response = await fetch(`${hostname}/orders/${data.orderId}`, {
+    const response = await fetch(`${appConfig.ip}/orders/${data.orderId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -169,7 +169,7 @@ export const cancelOrder = createAsyncThunk(
   'cancelOrder',
   async (data, { rejectWithValue }) => {
     console.log(data)
-    const response = await fetch(`${hostname}/orders/cancel/${data.orderId}?user_id=${data.userId}`, {
+    const response = await fetch(`${appConfig.ip}/orders/cancel/${data.orderId}?user_id=${data.userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -191,7 +191,7 @@ export const cancelOrder = createAsyncThunk(
 export const deleteOrder = createAsyncThunk(
   "deleteOrder",
   async (id, { rejectWithValue }) => {
-    const response = await fetch(`${hostname}/order/${id}`, {
+    const response = await fetch(`${appConfig.ip}/order/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -214,7 +214,7 @@ export const updateOrder = createAsyncThunk(
   "updateOrder",
   async (data, { rejectWithValue }) => {
     console.log("updated data", data);
-    const response = await fetch(`${hostname}/order/${data.id}`, {
+    const response = await fetch(`${appConfig.ip}/order/${data.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

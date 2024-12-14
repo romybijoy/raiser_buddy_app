@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { hostname } from "../../config";
+import { appConfig } from "../../config";
 
 export const fetchInvoice = createAsyncThunk(
   "fetchInvoice",
   async (invoiceId) => {
-    const response = await fetch(`${hostname}/invoice/${invoiceId}/download`);
+    const response = await fetch(`${appConfig.ip}/invoice/${invoiceId}/download`);
     if (!response.ok) {
       throw new Error("Failed to fetch invoice");
     }

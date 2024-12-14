@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { hostname } from "../../config";
+import { appConfig } from "../../config";
 
 const token = localStorage.getItem("token");
 
@@ -8,7 +8,7 @@ export const showProduct = createAsyncThunk(
   "showProduct",
   async (data, { rejectWithValue }) => {
     let response;
-    response = await fetch(`${hostname}/product?pageSize=30`, {
+    response = await fetch(`${appConfig.ip}/product?pageSize=30`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -31,7 +31,7 @@ export const showShopProduct = createAsyncThunk(
     console.log(data);
     let response;
     response = await fetch(
-      `${hostname}/product?pageSize=30&sortBy=name&sortOrder=${data.order}`,
+      `${appConfig.ip}/product?pageSize=30&sortBy=name&sortOrder=${data.order}`,
       {
         method: "GET",
       }
@@ -53,7 +53,7 @@ export const fetchProductById = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     console.log(data);
     let productId = data;
-    const response = await fetch(`${hostname}/product/${data.productId}`, {
+    const response = await fetch(`${appConfig.ip}/product/${data.productId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export const fetchProductById = createAsyncThunk(
 export const fetchProductByCategory = createAsyncThunk(
   "fetchProductByCategory",
   async (categoryId, { rejectWithValue }) => {
-    const response = await fetch(`${hostname}/product/category/${categoryId}`, {
+    const response = await fetch(`${appConfig.ip}/product/category/${categoryId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { hostname } from "../../config";
+import { appConfig } from "../../config";
 
 const email = localStorage.getItem("email");
 const token = localStorage.getItem("token");
@@ -10,7 +10,7 @@ export const createPayment = createAsyncThunk(
     console.log("data", data);
 
     try {
-      const response = await fetch(`${hostname}/payments/${data.orderId}`, {
+      const response = await fetch(`${appConfig.ip}/payments/${data.orderId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,7 +41,7 @@ export const updatePayment = createAsyncThunk(
     let response;
 
     response = await fetch(
-      `${hostname}/payments?payment_id=${data.paymentId}&order_id=${data.orderId}`,
+      `${appConfig.ip}/payments?payment_id=${data.paymentId}&order_id=${data.orderId}`,
       {
         method: "GET",
         headers: {

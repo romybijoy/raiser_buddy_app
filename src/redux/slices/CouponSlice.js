@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { hostname } from '../../config'
+import { appConfig } from '../../config'
 
 const token = localStorage.getItem('token')
 
@@ -9,7 +9,7 @@ export const createCoupon = createAsyncThunk(
     console.log('data', data)
 
     try {
-      const response = await fetch(`${hostname}/coupon`, {
+      const response = await fetch(`${appConfig.ip}/coupon`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const showCoupon = createAsyncThunk('showCoupon', async (data, { rejectWi
   let response
   try {
     response = await fetch(
-      `${hostname}/coupon`,
+      `${appConfig.ip}/coupon`,
       {
         method: 'GET',
         headers: {
@@ -60,7 +60,7 @@ export const showCoupon = createAsyncThunk('showCoupon', async (data, { rejectWi
 export const deleteCoupon = createAsyncThunk(
   'deleteCoupon',
   async (id, { rejectWithValue, dispatch }) => {
-    const response = await fetch(`${hostname}/coupon/${id}`, {
+    const response = await fetch(`${appConfig.ip}/coupon/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export const validateCoupon = createAsyncThunk('validateCoupon', async (data, { 
   let response
   try {
     response = await fetch(
-      `${hostname}/coupon/${data.code[0].text}`,
+      `${appConfig.ip}/coupon/${data.code[0].text}`,
       {
         method: 'GET',
         headers: {

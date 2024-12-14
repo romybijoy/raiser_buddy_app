@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { hostname } from "../../config";
+import { appConfig } from "../../config";
 
 const email = localStorage.getItem("email");
 const token = localStorage.getItem("token");
@@ -10,7 +10,7 @@ export const addToCart = createAsyncThunk(
     console.log("data", data.productId);
 
     try {
-      const response = await fetch(`${hostname}/cart/add/${email}`, {
+      const response = await fetch(`${appConfig.ip}/cart/add/${email}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export const showCart = createAsyncThunk(
     let response;
     console.log("dsdsfsfs", email);
     try {
-      response = await fetch(`${hostname}/cart/${email}`, {
+      response = await fetch(`${appConfig.ip}/cart/${email}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ export const removeCartItem = createAsyncThunk(
   "removeCartItem",
   async (data, { rejectWithValue }) => {
     const response = await fetch(
-      `${hostname}/cart_items/${email}/${data.cartItemId}`,
+      `${appConfig.ip}/cart_items/${email}/${data.cartItemId}`,
       {
         method: "DELETE",
         headers: {
@@ -90,7 +90,7 @@ export const updateCartItem = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     console.log("updated data", data);
     const response = await fetch(
-      `${hostname}/cart_items/${email}/${data.cartItemId}`,
+      `${appConfig.ip}/cart_items/${email}/${data.cartItemId}`,
       {
         method: "PUT",
         headers: {

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { hostname } from "../../config";
+import { appConfig } from "../../config";
 import { toast } from "react-toastify";
 
 const token = localStorage.getItem("token");
@@ -10,7 +10,7 @@ export const createWishlist = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     try {
       const response = await fetch(
-        `${hostname}/wishlist/${data.userId}/${data.productId}`,
+        `${appConfig.ip}/wishlist/${data.userId}/${data.productId}`,
         {
           method: "POST",
           headers: {
@@ -39,7 +39,7 @@ export const showWishlist = createAsyncThunk(
   "showWishlist",
   async (data, { rejectWithValue }) => {
     let response;
-    response = await fetch(`${hostname}/wishlist/${userId}`, {
+    response = await fetch(`${appConfig.ip}/wishlist/${userId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ export const deleteWishlist = createAsyncThunk(
   async (data, { rejectWithValue, dispatch, fulfillWithValue }) => {
     try {
       const response = await fetch(
-        `${hostname}/wishlist/${userId}/${data.productId}`,
+        `${appConfig.ip}/wishlist/${userId}/${data.productId}`,
         {
           method: "DELETE",
           headers: {

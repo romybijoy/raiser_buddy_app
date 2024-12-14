@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { hostname } from "../../config";
+import { appConfig } from "../../config";
 
 const token = localStorage.getItem("token");
 const email = localStorage.getItem("email");
@@ -10,7 +10,7 @@ export const createReview = createAsyncThunk(
     console.log("data", data);
 
     try {
-      const response = await fetch(`${hostname}/review/create/${email}`, {
+      const response = await fetch(`${appConfig.ip}/review/create/${email}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +38,7 @@ export const showReviews = createAsyncThunk(
     console.log(data);
     let response;
 
-    response = await fetch(`${hostname}/review/product/${data.productId}`, {
+    response = await fetch(`${appConfig.ip}/review/product/${data.productId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ export const createRating = createAsyncThunk(
     console.log("data", data);
 
     try {
-      const response = await fetch(`${hostname}/ratings/create/${email}`, {
+      const response = await fetch(`${appConfig.ip}/ratings/create/${email}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export const showRating = createAsyncThunk(
     console.log(data);
     let response;
 
-    response = await fetch(`${hostname}/ratings/product/${data}`, {
+    response = await fetch(`${appConfig.ip}/ratings/product/${data}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
