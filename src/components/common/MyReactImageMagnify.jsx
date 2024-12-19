@@ -1,11 +1,11 @@
 import React from "react";
 
-import ReactImageMagnify from "react-image-magnify";
+// import ReactImageMagnify from "react-image-magnify";
 
 const MyReactImageMagnify = (props) => {
   return (
     <div>
-      <ReactImageMagnify
+      {/* <ReactImageMagnify
         {...props}
         {...{
           smallImage: {
@@ -26,7 +26,7 @@ const MyReactImageMagnify = (props) => {
             height: "100%",
           },
         }}
-      />
+      /> */}
     </div>
   );
 };

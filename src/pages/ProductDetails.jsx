@@ -14,6 +14,8 @@ import { fetchProductById, showProduct } from "../redux/slices/ProductSlice";
 import { showReviews } from "../redux/slices/ReviewSlice";
 import { addToCart } from "../redux/slices/CartSlice";
 import MyReactImageMagnify from "../components/common/MyReactImageMagnify";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import ZoomImage from "../components/common/ZoomImage";
 
 const ProductDetails = () => {
   const [tab, setTab] = useState("desc");
@@ -68,19 +70,16 @@ const ProductDetails = () => {
       <CommonSection title="Product Details" subtitle={product?.name} />
 
       <section className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-2 px-4 pt-10">
-       
-        <div className="flex flex-col items-center ">
+        <div className="flex flex-col items-center shadow-md">
           <div
-            className="rounded-lg max-w-[30rem] max-h-[35rem]"
-            style={{ width: "469px", height: "338px" }}
+            className="rounded-lg max-w-[30rem] max-h-[35rem] mt-5 "
+            // style={{ width: "469px", height: "338px" }}
           >
-            <div id="imageMagnifyer">
-              <MyReactImageMagnify
-                image={
-                  activeImage || (product ? product?.images[0] : activeImage)
-                }
-              />
-            </div>
+            <ZoomImage
+              image={
+                activeImage || (product ? product?.images[0] : activeImage)
+              }
+            />
           </div>
           <div className="flex flex-wrap space-x-5 justify-center">
             {product?.images?.map((image, i) => (
@@ -98,13 +97,16 @@ const ProductDetails = () => {
             ))}
           </div>
         </div>
-        <div className="product_details">
-          <h2 className="text-sm lg:text-sm font-semibold" >{product?.name}</h2>
-          <div className="product_rating d-flex align-items-center gap-1 mb-3 rating_group">
+       
+        <div className="product-details p-6 bg-white rounded-md shadow-md">
+          <h2 className="text-lg lg:text-xl font-bold text-gray-800">
+            {product?.name}
+          </h2>
+          <div className="product-rating flex items-center gap-2 mb-3">
             <Tooltip
-              title={`Average Rating : ${Number(
-                product?.avgRating?.toFixed(2)
-              )}`}
+              title={`Average Rating: ${
+                product?.avgRating  ? Number(product.avgRating?.toFixed(2)) : 0
+              }`}
               placement="top-start"
             >
               <Box>
@@ -116,88 +118,75 @@ const ProductDetails = () => {
                 />
               </Box>
             </Tooltip>
-            <p>
+            <p className="text-gray-600">
               (<span>{reviews.length}</span> ratings)
             </p>
           </div>
 
-          {/* Product info */}
-          <div className="lg:col-span-1 mx-auto max-w-2xl px-1 pb-3 sm:px-6  lg:max-w-7xl  lg:px-8 lg:pb-24">
-            <div className="lg:col-span-2">
-              <h1 className="text-base lg:text-xl tracking-tight text-gray-900  ">
+          <div className="product-info mx-auto max-w-2xl px-4 pb-6 lg:max-w-5xl lg:px-8 lg:pb-24">
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-gray-900">
                 {product?.category?.name} Category
               </h1>
-              <p className="text-lg lg:text-lg  text-gray-900 opacity-60 pt-1">
-                {product?.shortDesc}
-              </p>
+              <p className="text-lg text-gray-700 pt-2">{product?.shortDesc}</p>
             </div>
-           
 
-            {/* Options */}
-            <div className="mt-4 lg:row-span-3 lg:mt-0">
+            <div className="mt-6">
               <h2 className="sr-only">Product information</h2>
-              <div className="flex space-x-4 items-center text-lg lg:text-xl tracking-tight text-gray-900 mt-6">
-                <p className="lg:text-xl font-semibold">₹{product?.specialPrice}</p>
-                <p className="lg:text-xl opacity-50 line-through">₹{product?.price}</p>
-
-                <p className="lg:text-xl text-green-600 font-semibold">
+              <div className="flex space-x-4 items-center text-lg lg:text-xl font-medium text-gray-900 mt-4">
+                <p className="text-xl font-bold text-green-600">
+                  ₹{product?.specialPrice}
+                </p>
+                <p className="text-xl line-through text-gray-400">
+                  ₹{product?.price}
+                </p>
+                <p className="text-xl text-green-600">
                   {product?.discount}% Off
                 </p>
               </div>
 
-              <div className="lg:col-span-2 pt-3">
+              <div className="pt-4">
                 {product?.quantity > 0 ? (
-                  <p className="lg:text-md text-md">
-                    {" "}
-                    {/* <span className="font-bold ">Quantity :</span> */}
-                    {"  "}
-                    <span className="lg:text-xl font-semibold text-blue-800">
-                      {" "}
+                  <p className="text-lg font-semibold">
+                    <span className="font-medium">
                       {product?.quantity} Kg left
                     </span>
                   </p>
                 ) : (
-                  <p className="text-red-600 font-bold lg:text-xl text-lg bg-blend-color">
-                    Out Of Stock
-                  </p>
+                  <p className="text-lg font-bold text-red-600">Out Of Stock</p>
                 )}
               </div>
             </div>
-            <div className="lg:col-span-5 pt-4">
-              <h3 className="text-lg lg:text-lg font-semibold pt-2">Provider contact info</h3>
-              <div className="px-3">
-              <p className="text-sm lg:text-lg  text-gray-700">
-                {product?.provider?.name}
-              </p>
-              <p className="text-sm lg:text-lg text-gray-700">
-                {product?.provider?.type === 'INDIVIDUAL' ? 'Farmer': 'company'}
-              </p>
-              <p className="text-sm lg:text-lg text-gray-700 pt-1">
-                {product?.provider?.mobile_number}
-              </p>
-              <p className="text-sm lg:text-lg text-gray-700 pt-1">
-                {product?.provider?.email}
-              </p>
 
-              <p className="text-sm lg:text-lg text-gray-900 pt-1">
-                {`${product?.provider?.address?.house_name} , ${product?.provider?.address?.place}, ${product?.provider?.address?.district} - ${product?.provider?.address?.zipcode}`}
-              </p>
+            <div className="pt-6">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Provider Contact Info
+              </h3>
+              <div className="mt-2 space-y-1 text-gray-700">
+                <p>{product?.provider?.name}</p>
+                <p>
+                  {product?.provider?.type === "INDIVIDUAL"
+                    ? "Farmer"
+                    : "Company"}
+                </p>
+                <p>{product?.provider?.mobile_number}</p>
+                <p>{product?.provider?.email}</p>
+                <p>{`${product && product?.provider?.address?.house_name}, ${ product && product?.provider?.address?.place}, ${product && product?.provider?.address?.district} - ${product && product?.provider?.address?.zipcode}`}</p>
               </div>
             </div>
           </div>
+
           <motion.button
             whileTap={{ scale: 1.2 }}
-            className="buy_btn"
+            className="buy-btn bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             onClick={handleSubmit}
-            disabled={product?.quantity !== 0 ? false : true}
+            disabled={product?.quantity === 0}
           >
-            {" "}
             Add to Cart
           </motion.button>
         </div>
-        {/* </Col>
-          </Row>
-        </Container> */}
+
+       
       </section>
 
       <section>
@@ -248,7 +237,6 @@ const ProductDetails = () => {
                   </div>
                 </div>
               ) : (
-                
                 <section className="">
                   <h1 className="font-semibold text-lg pb-4">
                     Recent Review & Ratings
@@ -274,9 +262,9 @@ const ProductDetails = () => {
                         </h1>
                         <div className="flex items-center space-x-3 pb-10">
                           <Tooltip
-                            title={`Average Rating : ${Number(
-                              product?.avgRating?.toFixed(2)
-                            )}`}
+                            title={`Average Rating: ${
+                              product?.avgRating  ? Number(product.avgRating?.toFixed(2)) : 0
+                            }`}
                             placement="top-start"
                           >
                             <Box>

@@ -100,7 +100,19 @@
   }
 }
 
-#imageMagnifyer img{
+/* #imageMagnifyer img{
 
   max-width: none !important;
+} */
+
+
+.small-button {
+  padding: 2px 4px;
+  margin: 2px;
+  font-size: 12px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
