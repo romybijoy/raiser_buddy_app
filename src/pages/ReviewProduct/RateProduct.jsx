@@ -15,6 +15,8 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { fetchProductById, showProduct } from "../../redux/slices/ProductSlice";
 import { showRating } from "../../redux/slices/ReviewSlice";
 
+import { toast } from "react-toastify";
+
 const RateProduct = () => {
   const [formData, setFormData] = useState({ title: "", description: "" });
   const [proData, setProData] = useState("");
@@ -66,7 +68,9 @@ const RateProduct = () => {
     }
     dispatch(createRating({ rating: rating, productId: productId }));
     setFormData({ title: "", description: "" });
+    toast.success("Review & Rating added successfully");
     navigate(`/product/${productId}`);
+
   };
 
   return (
@@ -95,12 +99,12 @@ const RateProduct = () => {
             {/* <p>Size: Free</p>
            {product.product?.color && <p>Color: {product.product?.color}</p>} */}
             <div className="flex items-center space-x-3">
-              <Rating name="read-only" value={4.6} precision={0.5} readOnly />
+              <Rating name="read-only" value={product?.avgRating} precision={0.5} readOnly />
 
-              <p className="opacity-60 text-sm">42807 Ratings</p>
-              <p className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500">
+              {/* <p className="opacity-60 text-sm">42807 Ratings</p> */}
+              {/* <p className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500">
                 {3789} reviews
-              </p>
+              </p> */}
             </div>
             <div>
               <p className="space-y-2 font-semibold">

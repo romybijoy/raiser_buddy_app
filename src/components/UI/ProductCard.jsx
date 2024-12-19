@@ -75,8 +75,8 @@ const ProductCard = ({ product, wishlist }) => {
             />
           </div>
           <div className="d-flex align-items-center justify-content-between p-2 product_info">
-            <div>
-              <h3 className="product_name">
+            <div className="pt-1">
+              <h3 className="font-semibold product_name">
                 {/* <Link to={`/shop/details/${item.productId}`}></Link> */}
                 {product.name}
               </h3>

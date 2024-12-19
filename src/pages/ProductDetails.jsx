@@ -5,20 +5,15 @@ import { Col, Container, Row } from "reactstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import "react-inner-image-zoom/lib/InnerImageZoom/styles.min.css";
-import ReactImageMagnify from "@blacklab/react-image-magnify";
 import ProductReviewCard from "./ProductReviewCard";
-
-import { Box, Button, Grid, LinearProgress, Rating } from "@mui/material";
+import { Box, Tooltip, Grid, LinearProgress, Rating } from "@mui/material";
 import "../styles/product-details.css";
-
-import Zoom from "react-medium-image-zoom";
-import "react-medium-image-zoom/dist/styles.css";
 
 import ProductsList from "../components/UI/ProductsList";
 import { fetchProductById, showProduct } from "../redux/slices/ProductSlice";
 import { showReviews } from "../redux/slices/ReviewSlice";
 import { addToCart } from "../redux/slices/CartSlice";
+import MyReactImageMagnify from "../components/common/MyReactImageMagnify";
 
 const ProductDetails = () => {
   const [tab, setTab] = useState("desc");
@@ -35,12 +30,6 @@ const ProductDetails = () => {
   console.log(productId);
   const [activeImage, setActiveImage] = useState("");
 
-  // let product = products.find(
-  //   (item) => (
-  //     console.log(item.productId), item.productId === Number(productId)
-  //   )
-  // );
-
   const [rating, setRating] = useState(null);
 
   // dispatch(fetchProductById(productId));
@@ -56,6 +45,7 @@ const ProductDetails = () => {
   const relatedProducts = products.filter(
     (item) => item?.category?.categoryId === product?.category?.categoryId
   );
+
   const submitHandler = (e) => {
     e.preventDefault();
 
@@ -78,74 +68,18 @@ const ProductDetails = () => {
       <CommonSection title="Product Details" subtitle={product?.name} />
 
       <section className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-2 px-4 pt-10">
-        {/* <Container>
-          <Row> */}
-        {/* <Col lg="6" className="text-white"> */}
-        {/* <Carousel
-                infiniteLoop={true}
-                showIndicator={false}
-                showStatus={false}
-                thumbWidth={60}
-                className="product-carousel"
-                autoFocus= {true}
-              > */}
-        {/* {product.images.map((image, i) => ( */}
-        {/* // <img key={i} src={image} />
-                // <InnerImageZoom src={image} zoomSrc={image} width={1000}/> */}
-        {/* // <div id="imageMagnifyer"> */}
-        {/* <ReactImageMagnify
-                  {...{
-                    smallImage: {
-                      alt: "Wristwatch by Ted Baker London",
-                      isFluidWidth: true,
-                      src: image,
-                    },
-                    largeImage: {
-                      src: image,
-                      width: 1129,
-                      height: 750,
-                    },
-                    isHintEnabled: true,
-                  }}
-                />
-                // </div>
-              ))} */}
-        {/* </Carousel> */}
-        {/* </Col> */}
-
-        {/* <Col> */}
+       
         <div className="flex flex-col items-center ">
           <div
             className="rounded-lg max-w-[30rem] max-h-[35rem]"
             style={{ width: "469px", height: "338px" }}
           >
             <div id="imageMagnifyer">
-              <ReactImageMagnify
-                imageProps={{
-                  alt: "Wristwatch by Ted Baker London",
-                  isFluidWidth: true,
-                  src:
-                    activeImage || (product ? product?.images[0] : activeImage),
-                }}
-                magnifiedImageProps={{
-                  src:
-                    activeImage || (product ? product?.images[0] : activeImage),
-                  width: 800,
-                  height: 1800,
-                }}
-                MagnifiedImagePosition="top"
+              <MyReactImageMagnify
+                image={
+                  activeImage || (product ? product?.images[0] : activeImage)
+                }
               />
-
-              {/* <Zoom>
-                <img
-                  alt="Example Image"
-                  src={
-                    activeImage || (product ? product?.images[0] : activeImage)
-                  }
-                  width="1000"
-                  style={{ cursor: "pointer" }}
-                />
-              </Zoom> */}
             </div>
           </div>
           <div className="flex flex-wrap space-x-5 justify-center">
@@ -165,34 +99,48 @@ const ProductDetails = () => {
           </div>
         </div>
         <div className="product_details">
-          <h2>{product?.name}</h2>
+          <h2 className="text-sm lg:text-sm font-semibold" >{product?.name}</h2>
           <div className="product_rating d-flex align-items-center gap-1 mb-3 rating_group">
-            <Rating name="read-only" value={4.6} precision={0.5} readOnly />
-
+            <Tooltip
+              title={`Average Rating : ${Number(
+                product?.avgRating?.toFixed(2)
+              )}`}
+              placement="top-start"
+            >
+              <Box>
+                <Rating
+                  name="decimal-rating"
+                  value={product?.avgRating}
+                  precision={0.5}
+                  readOnly
+                />
+              </Box>
+            </Tooltip>
             <p>
               (<span>{reviews.length}</span> ratings)
             </p>
           </div>
 
           {/* Product info */}
-          <div className="lg:col-span-1 mx-auto max-w-2xl px-1 pb-5 sm:px-6  lg:max-w-7xl  lg:px-8 lg:pb-24">
+          <div className="lg:col-span-1 mx-auto max-w-2xl px-1 pb-3 sm:px-6  lg:max-w-7xl  lg:px-8 lg:pb-24">
             <div className="lg:col-span-2">
-              <h1 className="text-lg lg:text-xl font-semibold tracking-tight text-gray-900  ">
-                {product?.category?.name}
+              <h1 className="text-base lg:text-xl tracking-tight text-gray-900  ">
+                {product?.category?.name} Category
               </h1>
-              <h1 className="text-lg lg:text-xl tracking-tight text-gray-900 opacity-60 pt-1">
+              <p className="text-lg lg:text-lg  text-gray-900 opacity-60 pt-1">
                 {product?.shortDesc}
-              </h1>
+              </p>
             </div>
+           
 
             {/* Options */}
             <div className="mt-4 lg:row-span-3 lg:mt-0">
               <h2 className="sr-only">Product information</h2>
               <div className="flex space-x-4 items-center text-lg lg:text-xl tracking-tight text-gray-900 mt-6">
-                <p className="font-semibold">₹{product?.specialPrice}</p>
-                <p className="opacity-50 line-through">₹{product?.price}</p>
+                <p className="lg:text-xl font-semibold">₹{product?.specialPrice}</p>
+                <p className="lg:text-xl opacity-50 line-through">₹{product?.price}</p>
 
-                <p className="text-green-600 font-semibold">
+                <p className="lg:text-xl text-green-600 font-semibold">
                   {product?.discount}% Off
                 </p>
               </div>
@@ -201,11 +149,11 @@ const ProductDetails = () => {
                 {product?.quantity > 0 ? (
                   <p className="lg:text-md text-md">
                     {" "}
-                    <span className="font-bold ">Quantity :</span>
+                    {/* <span className="font-bold ">Quantity :</span> */}
                     {"  "}
-                    <span className="text-blue-800">
+                    <span className="lg:text-xl font-semibold text-blue-800">
                       {" "}
-                      {product?.quantity} Kg
+                      {product?.quantity} Kg left
                     </span>
                   </p>
                 ) : (
@@ -213,6 +161,27 @@ const ProductDetails = () => {
                     Out Of Stock
                   </p>
                 )}
+              </div>
+            </div>
+            <div className="lg:col-span-5 pt-4">
+              <h3 className="text-lg lg:text-lg font-semibold pt-2">Provider contact info</h3>
+              <div className="px-3">
+              <p className="text-sm lg:text-lg  text-gray-700">
+                {product?.provider?.name}
+              </p>
+              <p className="text-sm lg:text-lg text-gray-700">
+                {product?.provider?.type === 'INDIVIDUAL' ? 'Farmer': 'company'}
+              </p>
+              <p className="text-sm lg:text-lg text-gray-700 pt-1">
+                {product?.provider?.mobile_number}
+              </p>
+              <p className="text-sm lg:text-lg text-gray-700 pt-1">
+                {product?.provider?.email}
+              </p>
+
+              <p className="text-sm lg:text-lg text-gray-900 pt-1">
+                {`${product?.provider?.address?.house_name} , ${product?.provider?.address?.place}, ${product?.provider?.address?.district} - ${product?.provider?.address?.zipcode}`}
+              </p>
               </div>
             </div>
           </div>
@@ -258,84 +227,44 @@ const ProductDetails = () => {
                   <div className="pt-2 ">
                     <h3 className="font-bold pb-2">Specification</h3>
                     <p>
-                      These products are made from fresh, frozen, dehydrated, or
-                      matured fruits that are packed and processed by heat to
-                      prevent spoilage. <br />
-                      The packaging and labeling of these products must comply
-                      with the Food Safety and Standards{" "}
+                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
+                      Qui blanditiis enim reiciendis, id, officia, dolorem eaque
+                      sint ex eligendi eveniet sapiente? Ad harum fugiat atque
+                      accusamus quas necessitatibus aliquid distinctio. Lorem
+                      ipsum dolor sit amet consectetur adipisicing elit.
+                      Placeat, tempore iusto quo magnam nihil unde, illum vero
+                      sed reprehenderit quas et tenetur itaque! Iusto ducimus ut
+                      rem necessitatibus sed culpa laboriosam nemo, harum amet
+                      sunt labore id facere maxime dolore excepturi. Animi
+                      expedita assumenda quidem rem reiciendis unde deleniti
+                      porro adipisci a natus perferendis nostrum neque beatae,
+                      cumque corrupti nisi placeat, qui possimus? Dolores
+                      doloremque, voluptates libero modi quas numquam nobis
+                      itaque sunt tempore odit ex est mollitia officiis
+                      obcaecati iure corrupti quaerat error. Pariatur ipsam
+                      repellat neque explicabo quas ea sed architecto iure quis
+                      perferendis. Fugiat hic vitae veniam.
                     </p>
                   </div>
                 </div>
               ) : (
-                // <div className="product_review mt-5">
-                //   <div className="review_wrapper">
-                //     <ul>
-                //       {product?.reviews?.map((item, index) => (
-                //         <li key={index} className="mb-4">
-                //           <h6>{item.user.name}</h6>
-                //           <span>{item.rating} (rating) </span>
-                //           <p>{item.text}</p>
-                //         </li>
-                //       ))}
-                //     </ul>
-
-                //     {/* <div className="review_form">
-                //       <h4>Leave your experience</h4>
-                //       <form action="" onSubmit={submitHandler}>
-                //         <div className="form_group">
-                //           <input
-                //             type="text"
-                //             placeholder="Enter name"
-                //             ref={reviewUser}
-                //           />
-                //         </div>
-
-                //         <div className="form_group d-flex align-items-center gap-5">
-                //           <span onClick={() => setRating(1)}>
-                //             1<i className="ri-star-s-fill"></i>
-                //           </span>
-                //           <span onClick={() => setRating(2)}>
-                //             2<i className="ri-star-s-fill"></i>
-                //           </span>
-                //           <span onClick={() => setRating(3)}>
-                //             3<i className="ri-star-s-fill"></i>
-                //           </span>
-                //           <span onClick={() => setRating(4)}>
-                //             4<i className="ri-star-s-fill"></i>
-                //           </span>
-                //           <span onClick={() => setRating(5)}>
-                //             5<i className="ri-star-s-fill"></i>
-                //           </span>
-                //         </div>
-
-                //         <div className="form_group">
-                //           <textarea
-                //             ref={reviewMsg}
-                //             rows={4}
-                //             type="text"
-                //             placeholder="Review Message.."
-                //           />
-                //         </div>
-                //         <button type="submit" className="buy_btn">
-                //           Submit
-                //         </button>
-                //       </form>
-                //     </div> */}
-                //   </div>
-                // </div>
-
+                
                 <section className="">
                   <h1 className="font-semibold text-lg pb-4">
                     Recent Review & Ratings
                   </h1>
 
                   <div className="border p-5">
-                    <Grid container spacing={7}>
+                    <Grid container>
                       <Grid item xs={7}>
                         <div className="space-y-5">
-                          {reviews.map((item, i) => (
-                            <ProductReviewCard item={item} />
-                          ))}
+                          {product && product?.reviews?.length !== 0 ? (
+                            product?.reviews?.map((item, i) => (
+                              <ProductReviewCard item={item} />
+                            ))
+                          ) : (
+                            <h2> No reviews yet! </h2>
+                          )}
                         </div>
                       </Grid>
 
@@ -344,12 +273,22 @@ const ProductDetails = () => {
                           Product Ratings
                         </h1>
                         <div className="flex items-center space-x-3 pb-10">
-                          <Rating
-                            name="read-only"
-                            value={4.6}
-                            precision={0.5}
-                            readOnly
-                          />
+                          <Tooltip
+                            title={`Average Rating : ${Number(
+                              product?.avgRating?.toFixed(2)
+                            )}`}
+                            placement="top-start"
+                          >
+                            <Box>
+                              <Rating
+                                name="decimal-rating"
+                                defaultValue={0}
+                                value={product?.avgRating}
+                                precision={0.5}
+                                readOnly
+                              />
+                            </Box>
+                          </Tooltip>
 
                           <p className="opacity-60">{reviews.length} Ratings</p>
                         </div>
@@ -360,10 +299,10 @@ const ProductDetails = () => {
                             alignItems="center"
                             gap={2}
                           >
-                            <Grid xs={2}>
+                            <Grid item xs={2}>
                               <p className="p-0">Excellent</p>
                             </Grid>
-                            <Grid xs={7}>
+                            <Grid item xs={7}>
                               <LinearProgress
                                 className=""
                                 sx={{
@@ -372,12 +311,12 @@ const ProductDetails = () => {
                                   height: 7,
                                 }}
                                 variant="determinate"
-                                value={40}
+                                value={reviews.length}
                                 color="success"
                               />
                             </Grid>
-                            <Grid xs={2}>
-                              <p className="opacity-50 p-2">19259</p>
+                            <Grid item xs={2}>
+                              <p className="opacity-50 p-2">{reviews.length}</p>
                             </Grid>
                           </Grid>
                         </Box>
@@ -388,10 +327,10 @@ const ProductDetails = () => {
                             alignItems="center"
                             gap={2}
                           >
-                            <Grid xs={2}>
+                            <Grid item xs={2}>
                               <p className="p-0">Very Good</p>
                             </Grid>
-                            <Grid xs={7}>
+                            <Grid item xs={7}>
                               <LinearProgress
                                 className=""
                                 sx={{
@@ -400,12 +339,12 @@ const ProductDetails = () => {
                                   height: 7,
                                 }}
                                 variant="determinate"
-                                value={30}
+                                value={0}
                                 color="success"
                               />
                             </Grid>
-                            <Grid xs={2}>
-                              <p className="opacity-50 p-2">19259</p>
+                            <Grid item xs={2}>
+                              <p className="opacity-50 p-2">0</p>
                             </Grid>
                           </Grid>
                         </Box>
@@ -416,10 +355,10 @@ const ProductDetails = () => {
                             alignItems="center"
                             gap={2}
                           >
-                            <Grid xs={2}>
+                            <Grid item xs={2}>
                               <p className="p-0">Good</p>
                             </Grid>
-                            <Grid xs={7}>
+                            <Grid item xs={7}>
                               <LinearProgress
                                 className="bg-[#885c0a]"
                                 sx={{
@@ -428,12 +367,12 @@ const ProductDetails = () => {
                                   height: 7,
                                 }}
                                 variant="determinate"
-                                value={25}
+                                value={0}
                                 color="orange"
                               />
                             </Grid>
-                            <Grid xs={2}>
-                              <p className="opacity-50 p-2">19259</p>
+                            <Grid item xs={2}>
+                              <p className="opacity-50 p-2">0</p>
                             </Grid>
                           </Grid>
                         </Box>
@@ -444,10 +383,10 @@ const ProductDetails = () => {
                             alignItems="center"
                             gap={2}
                           >
-                            <Grid xs={2}>
+                            <Grid item xs={2}>
                               <p className="p-0">Avarage</p>
                             </Grid>
-                            <Grid xs={7}>
+                            <Grid item xs={7}>
                               <LinearProgress
                                 className=""
                                 sx={{
@@ -459,12 +398,12 @@ const ProductDetails = () => {
                                   },
                                 }}
                                 variant="determinate"
-                                value={21}
+                                value={0}
                                 color="success"
                               />
                             </Grid>
-                            <Grid xs={2}>
-                              <p className="opacity-50 p-2">19259</p>
+                            <Grid item xs={2}>
+                              <p className="opacity-50 p-2">0</p>
                             </Grid>
                           </Grid>
                         </Box>
@@ -475,10 +414,10 @@ const ProductDetails = () => {
                             alignItems="center"
                             gap={2}
                           >
-                            <Grid xs={2}>
+                            <Grid item xs={2}>
                               <p className="p-0">Poor</p>
                             </Grid>
-                            <Grid xs={7}>
+                            <Grid item xs={7}>
                               <LinearProgress
                                 className=""
                                 sx={{
@@ -487,12 +426,12 @@ const ProductDetails = () => {
                                   height: 7,
                                 }}
                                 variant="determinate"
-                                value={10}
+                                value={0}
                                 color="error"
                               />
                             </Grid>
-                            <Grid xs={2}>
-                              <p className="opacity-50 p-2">19259</p>
+                            <Grid item xs={2}>
+                              <p className="opacity-50 p-2">0</p>
                             </Grid>
                           </Grid>
                         </Box>

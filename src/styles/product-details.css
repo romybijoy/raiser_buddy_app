@@ -100,10 +100,7 @@
   }
 }
 
-#imageMagnifyer {
-  /* width: 80px;
-  height: 80px; */
+#imageMagnifyer img{
 
-  max-width: 100%;
-  /* width: 400px; */
+  max-width: none !important;
 }

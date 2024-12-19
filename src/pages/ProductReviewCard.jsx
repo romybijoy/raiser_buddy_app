@@ -22,18 +22,25 @@ const ProductReviewCard = ({ item }) => {
         <Grid item xs={9}>
           <div className="space-y-2">
             <div className="">
-              {/* <p className="font-semibold text-lg">{item.user.name}</p> */}
-              <p className="opacity-70">{item.created_at}</p>
+              <p className="font-semibold text-lg">{item?.user?.name}</p>
+              <p className="opacity-70">
+                {new Date(item.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
             </div>
             <div>
               <Rating
                 value={value}
-                onChange={(event, newValue) => {
-                  setValue(newValue);
-                }}
-                name="half-rating"
-                defaultValue={item.rating}
-                // precision={0.5}
+                // onChange={(event, newValue) => {
+                //   setValue(newValue);
+                // }}
+                name="decimal-rating"
+                defaultValue={0}
+                precision={0.5}
+                readOnly
               />
             </div>
             <p>{item.review}</p>
