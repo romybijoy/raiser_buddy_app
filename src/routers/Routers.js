@@ -1,28 +1,32 @@
-import React from "react";
+import React, { Suspense} from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import Home from "../pages/Home";
-import Shop from "../pages/Shop";
-import Checkout from "../pages/Checkout/Checkout";
-import ProductDetails from "../pages/ProductDetails";
-import Login from "../pages/auth/Login";
-import Signup from "../pages/auth/Register";
-import VerifyOtp from "../pages/auth/VerifyOtp";
-import ForgotPassword from "../pages/auth/ForgotPassword";
-import ResetPassword from "../pages/auth/ResetPassword";
-import Order from "../pages/orders/Order";
-import OrderDetails from "../pages/orders/OrderDetails";
-import Protected from "../components/Protected/Protected";
-import Cart from "../pages/Cart/Cart";
-import RateProduct from "../pages/ReviewProduct/RateProduct";
-import Account from "../pages/Account/Account";
-import Address from "../pages/Account/Address";
-import PaymentSuccess from "../pages/paymentSuccess/PaymentSuccess";
-
-import WishList from "../pages/Account/WishListScreen";
-import Coupons from "../pages/Account/Coupons";
+const Home = React.lazy(() => import("../pages/Home"));
+const Shop = React.lazy(() => import("../pages/Shop"));
+const Checkout = React.lazy(() => import("../pages/Checkout/Checkout"));
+const ProductDetails = React.lazy(() => import("../pages/ProductDetails"));
+const Login = React.lazy(() => import("../pages/auth/Login"));
+const Signup = React.lazy(() => import("../pages/auth/Register"));
+const VerifyOtp = React.lazy(() => import("../pages/auth/VerifyOtp"));
+const ForgotPassword = React.lazy(() => import("../pages/auth/ForgotPassword"));
+const ResetPassword = React.lazy(() => import("../pages/auth/ResetPassword"));
+const Order = React.lazy(() => import("../pages/orders/Order"));
+const OrderDetails = React.lazy(() => import("../pages/orders/OrderDetails"));
+const Protected = React.lazy(() => import("../components/Protected/Protected"));
+const Cart = React.lazy(() => import("../pages/Cart/Cart"));
+const RateProduct = React.lazy(() =>
+  import("../pages/ReviewProduct/RateProduct")
+);
+const Account = React.lazy(() => import("../pages/Account/Account"));
+const Address = React.lazy(() => import("../pages/Account/Address"));
+const PaymentSuccess = React.lazy(() =>
+  import("../pages/paymentSuccess/PaymentSuccess")
+);
+const WishList = React.lazy(() => import("../pages/Account/WishListScreen"));
+const Coupons = React.lazy(() => import("../pages/Account/Coupons"));
 
 const Routers = () => {
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <Routes>
       <Route path="/" element={<Navigate to={"home"} />} />
 
@@ -120,6 +124,7 @@ const Routers = () => {
         }
       />
     </Routes>
+    </Suspense>
   );
 };
 
