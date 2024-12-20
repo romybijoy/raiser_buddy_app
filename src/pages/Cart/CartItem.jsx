@@ -6,7 +6,7 @@ import { IconButton } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
-const CartItem = ({ item, showButton }) => {
+const CartItem = ({ item, showButton, loading }) => {
   const dispatch = useDispatch();
 
   const handleRemoveItemFromCart = () => {
@@ -20,6 +20,12 @@ const CartItem = ({ item, showButton }) => {
     };
     dispatch(updateCartItem(data));
   };
+
+  console.log(item)
+  if (loading) {
+    return <h2>Loading</h2>;
+  }
+
   return (
     <div className="p-5 shadow-lg border rounded-md">
       <div className="flex items-center">

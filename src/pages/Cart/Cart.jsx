@@ -41,7 +41,7 @@ const Cart = () => {
             <div className="lg:col-span-2 lg:px-5 bg-white">
               <div className=" space-y-3">
                 {cartData?.cartItems.map((item, i) => (
-                  <CartItem key={i} item={item} showButton={true} />
+                  <CartItem key={i} item={item} showButton={true} loading={loading}/>
                 ))}
               </div>
             </div>
