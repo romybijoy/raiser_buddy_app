@@ -19,6 +19,8 @@
     "raiser_buddy_app": "file:",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.4",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-facebook": "^9.0.12",
     "react-query": "^3.39.3",
