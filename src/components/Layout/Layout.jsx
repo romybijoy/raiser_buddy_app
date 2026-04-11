@@ -15,11 +15,21 @@ const Layout = () => {
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
 
+  const { currentUser } = useSelector((state) => state.app);
+
   useEffect(() => {
-    dispatch(getProf());
-    dispatch(showCart());
-    dispatch(showWishlist());
-  }, [dispatch]);
+    if (token) {
+      dispatch(getProf());
+    }
+  }, [dispatch, token]);
+
+  // Step 2: Load dependent data AFTER user is available
+  useEffect(() => {
+    if (currentUser?.id) {
+      dispatch(showCart(currentUser.id));
+      dispatch(showWishlist(currentUser.id));
+    }
+  }, [currentUser, dispatch]);
 
   return (
     <>

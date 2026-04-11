@@ -3,7 +3,6 @@ import { appConfig } from "../../config";
 import { toast } from "react-toastify";
 
 const token = localStorage.getItem("token");
-const userId = localStorage.getItem("id");
 
 export const createWishlist = createAsyncThunk(
   "createWishlist",
@@ -24,7 +23,7 @@ export const createWishlist = createAsyncThunk(
       }
 
       const result = await response.json();
-      dispatch(showWishlist(userId));
+      dispatch(showWishlist(data.userId));
       toast.success("Product Added to Wishlist Successfully");
       return result;
     } catch (error) {
@@ -37,7 +36,7 @@ export const createWishlist = createAsyncThunk(
 //read action
 export const showWishlist = createAsyncThunk(
   "showWishlist",
-  async (data, { rejectWithValue }) => {
+  async (userId, { rejectWithValue }) => {
     let response;
     response = await fetch(`${appConfig.ip}/wishlist/${userId}`, {
       method: "GET",
@@ -48,8 +47,7 @@ export const showWishlist = createAsyncThunk(
 
     try {
       const result = await response.json();
-      // console.log(result);
-      return result;
+      return Array.isArray(result) ? result : [];
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -61,7 +59,7 @@ export const deleteWishlist = createAsyncThunk(
   async (data, { rejectWithValue, dispatch, fulfillWithValue }) => {
     try {
       const response = await fetch(
-        `${appConfig.ip}/wishlist/${userId}/${data.productId}`,
+        `${appConfig.ip}/wishlist/${data.userId}/${data.productId}`,
         {
           method: "DELETE",
           headers: {
@@ -74,7 +72,7 @@ export const deleteWishlist = createAsyncThunk(
       const result = await response.json();
       console.log(response);
       if (response.ok) {
-        dispatch(showWishlist(userId));
+        dispatch(showWishlist(data.userId));
         
       toast.success("Product Removed from Wishlist Successfully");
         return fulfillWithValue(response.status);
@@ -112,15 +110,15 @@ export const wishlistSlice = createSlice({
       })
       .addCase(createWishlist.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Something went wrong";
       })
       .addCase(showWishlist.pending, (state) => {
         state.loading = true;
       })
       .addCase(showWishlist.fulfilled, (state, action) => {
         state.loading = false;
-        state.wishlist = action.payload;
-        state.count = action.payload.length;
+        state.wishlist = Array.isArray(action.payload) ? action.payload : [];
+state.count = state.wishlist.length;
       })
       .addCase(showWishlist.rejected, (state, action) => {
         state.loading = false;
