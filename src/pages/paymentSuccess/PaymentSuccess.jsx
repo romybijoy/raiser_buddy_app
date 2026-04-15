@@ -1,89 +1,97 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updatePayment } from "../../redux/slices/PaymentSlice";
-import { Alert, AlertTitle, Box, Grid } from "@mui/material";
-import { deepPurple } from "@mui/material/colors";
-import StarIcon from "@mui/icons-material/Star";
-import OrderTraker from "../orders/OrderTraker";
-import AddressCard from "../../components/address/AdreessCard";
 import { useParams } from "react-router-dom";
 import { fetchOrderById } from "../../redux/slices/OrderSlice";
+import OrderTraker from "../orders/OrderTraker";
+import AddressCard from "../../components/address/AdreessCard";
 
 const PaymentSuccess = () => {
-  // razorpay_payment_link_reference_id
-  // razorpay_payment_id
-
-  const urlParams = new URLSearchParams(window.location.search);
   const [paymentId, setPaymentId] = useState("");
-  const [referenceId, setReferenceId] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
-  const { orderId } = useParams();
 
-  const jwt = localStorage.getItem("jwt");
+  const { orderId } = useParams();
   const dispatch = useDispatch();
   const { order } = useSelector((store) => store.order);
-  console.log("orderId", orderId, order);
+
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    setPaymentId(urlParams.get("razorpay_payment_id"));
-    setReferenceId(urlParams.get("razorpay_payment_link_reference_id"));
-    setPaymentStatus(urlParams.get("razorpay_payment_link_status"));
-  }, [window.location.search]);
+    const params = new URLSearchParams(window.location.search);
+    setPaymentId(params.get("razorpay_payment_id"));
+    setPaymentStatus(params.get("razorpay_payment_link_status"));
+  }, []);
 
   useEffect(() => {
     if (paymentId && paymentStatus === "paid") {
-      const data = { orderId, paymentId };
-      dispatch(updatePayment(data));
-      dispatch(fetchOrderById(data));
+      dispatch(updatePayment({ orderId, paymentId }));
+      dispatch(fetchOrderById({ orderId }));
     }
   }, [orderId, paymentId]);
 
   return (
-    <div className="px-2 lg:px-36">
-      <div className="flex flex-col justify-center items-center">
-        <Alert
-          variant="filled"
-          severity="success"
-          sx={{ mb: 6, width: "fit-content" }}
-        >
-          <AlertTitle>Payment Success</AlertTitle>
-          Congratulation Your Order Get Placed
-        </Alert>
+    <div className="bg-gray-50 min-h-screen px-4 lg:px-20 py-8 space-y-6">
+
+      {/* ✅ SUCCESS MESSAGE */}
+      <div className="flex flex-col items-center justify-center text-center bg-white border rounded-xl shadow-sm p-6">
+        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">
+          ✔
+        </div>
+
+        <h2 className="text-xl font-semibold mt-3">
+          Payment Successful
+        </h2>
+
+        <p className="text-gray-500 mt-1">
+          Your order has been placed successfully 🎉
+        </p>
       </div>
 
-      <OrderTraker activeStep={1} />
+      {/* ✅ ORDER TRACKER */}
+      <div className="bg-white border rounded-xl shadow-sm p-5">
+        <OrderTraker activeStep={1} />
+      </div>
 
-      <Grid container className="space-y-5 py-5 pt-20">
-        {order &&
-          order.orderItems.map((item) => (
-            <Grid
-              container
-              item
-              className="shadow-xl rounded-md p-5 border"
-              sx={{ alignItems: "center", justifyContent: "space-between" }}
-            >
-              <Grid item xs={6}>
-                {" "}
-                <div className="flex  items-center ">
-                  <img
-                    className="w-[5rem] h-[5rem] object-cover object-top"
-                    src={item?.product.images}
-                    alt=""
-                  />
-                  <div className="ml-5 space-y-2">
-                    <p className="">{item.product.name}</p>
-                    <p className="opacity-50 text-xs font-semibold space-x-5">
-                      Category: {item.product.category.name}</p>
-                    <p>₹{item.price}</p>
-                  </div>
-                </div>
-              </Grid>
-              <Grid item>
-                <AddressCard address={order?.shippingAddress} />
-              </Grid>
-            </Grid>
-          ))}
-      </Grid>
+      {/* ✅ ADDRESS (ONLY ONCE) */}
+      <div className="bg-white border rounded-xl shadow-sm p-5">
+        <h3 className="font-semibold mb-3">Delivery Address</h3>
+        <AddressCard address={order?.shippingAddress} />
+      </div>
+
+      {/* ✅ ORDER ITEMS */}
+      <div className="space-y-4">
+        {order?.orderItems?.map((item, index) => (
+          <div
+            key={index}
+            className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white border rounded-xl shadow-sm p-4 hover:shadow-md transition"
+          >
+
+            {/* LEFT: PRODUCT */}
+            <div className="flex items-center gap-4 w-full md:w-2/3">
+              <img
+                src={item?.product?.images?.[0] || "/placeholder.png"}
+                alt=""
+                className="w-20 h-20 object-cover rounded-lg border"
+              />
+
+              <div className="space-y-1">
+                <p className="font-medium">{item.product.name}</p>
+                <p className="text-sm text-gray-500">
+                  Category: {item.product.category?.name}
+                </p>
+                <p className="font-semibold text-green-600">
+                  ₹{item.price}
+                </p>
+              </div>
+            </div>
+
+            {/* RIGHT: STATUS */}
+            <div className="text-green-600 font-medium">
+              Order Confirmed
+            </div>
+
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 };

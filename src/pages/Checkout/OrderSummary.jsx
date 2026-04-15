@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import CartItem from "../Cart/CartItem";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,137 +6,170 @@ import { fetchOrderById } from "../../redux/slices/OrderSlice";
 import AddressCard from "../../components/address/AdreessCard";
 import { validateCoupon } from "../../redux/slices/CouponSlice";
 
-import TagInput from "../../components/common/TagInput";
-
 const OrderSummary = () => {
   const { order } = useSelector((state) => state.order);
+  const { coupon } = useSelector((state) => state.coupon);
+
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const orderId = searchParams.get("order_id");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { coupon } = useSelector((state) => state.coupon);
-  const [couponCode, setCouponCode] = useState([]);
 
+  const [couponCode, setCouponCode] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
+
+  // Fetch order
   useEffect(() => {
-    const input = { orderId: Number(orderId) };
-    dispatch(fetchOrderById(input));
-    if (order?.totalPrice < 1000) {
-      setTotalPrice(order?.totalDiscountedPrice + 40);
-    } else{
-    setTotalPrice(order?.totalDiscountedPrice);
+    dispatch(fetchOrderById({ orderId: Number(orderId) }));
+  }, [orderId]);
+
+  // Calculate total
+  useEffect(() => {
+    if (order) {
+      if (order.totalPrice < 1000) {
+        setTotalPrice(order.totalDiscountedPrice + 40);
+      } else {
+        setTotalPrice(order.totalDiscountedPrice);
+      }
     }
-  }, [dispatch]);
+  }, [order]);
 
   const handlePayment = () => {
-    navigate({ search: `step=4&order_id=${order?.id}` });
+    navigate(`/checkout?step=4&order_id=${order?.id}`);
   };
 
   const handleCoupon = (e) => {
     e.preventDefault();
-    console.log(couponCode);
+    if (!couponCode) return;
     dispatch(validateCoupon({ code: couponCode }));
   };
+
   return (
-    <div className="space-y-5">
-      <div className="p-5 shadow-lg rounded-md border ">
+    <div className="space-y-6">
+      {/* ADDRESS */}
+      <div className="bg-white border rounded-xl shadow-sm p-5 hover:shadow-md transition">
         <AddressCard address={order?.shippingAddress} />
       </div>
-      <div className="lg:grid grid-cols-3 relative justify-between">
-        <div className="lg:col-span-2 ">
-          <div className=" space-y-3">
-            {order &&
-              order?.orderItems?.map((item, index) => (
-                <>
-                  <CartItem item={item} key={index} showButton={false} />
-                </>
-              ))}
-          </div>
-        </div>
-        <div className="sticky top-0 h-[100vh] mt-0 lg:mt-0 ml-5">
-          <div className="border p-5 bg-white shadow-lg rounded-md">
-            <p className="font-bold opacity-60 pb-4">PRICE DETAILS</p>
-            <hr />
 
-            <div className="space-y-3 font-semibold">
-              <div className="flex justify-between pt-3 text-black ">
-                <span>Price ({order && order?.totalItem} item)</span>
-                <span>₹{order && order?.totalPrice}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* LEFT: ITEMS */}
+        <div className="lg:col-span-2 space-y-4">
+          {order?.orderItems?.map((item, index) => (
+            <div
+              key={index}
+              className="flex gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition"
+            >
+              {/* IMAGE */}
+              <img
+                src={item?.product?.images?.[0] || "/placeholder.png"}
+                alt=""
+                className="w-24 h-24 object-cover rounded-lg border"
+              />
+
+              {/* DETAILS */}
+              <div className="flex flex-col justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-800">
+                    {item.product.name}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {item.product.category?.name}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="line-through text-gray-400 text-sm">
+                    ₹{item.product.price}
+                  </span>
+                  <span className="font-semibold text-lg">₹{item.price}</span>
+                  <span className="text-green-600 text-sm">
+                    {item.product.discount}% off
+                  </span>
+                </div>
+
+                <p className="text-xs text-gray-500">
+                  Expected delivery in 2–3 days
+                </p>
               </div>
+            </div>
+          ))}
+        </div>
+
+        {/* RIGHT: PRICE DETAILS */}
+        <div className="sticky top-24 h-fit">
+          <div className="bg-white border border-gray-200 shadow-md rounded-xl p-5 space-y-4">
+            <h3 className="font-semibold text-gray-700">Price Details</h3>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Price ({order?.totalItem} items)</span>
+                <span>₹{order?.totalPrice}</span>
+              </div>
+
               <div className="flex justify-between">
                 <span>Discount</span>
-                <span className="text-green-700">
-                  -₹{order && order?.discount}
-                </span>
+                <span className="text-green-600">-₹{order?.discount}</span>
               </div>
+
               <div className="flex justify-between">
-                <span>Delivery Charges</span>
+                <span>Delivery</span>
                 {order?.totalPrice < 1000 ? (
-                  <span className="flex space-x-2 items-center">
-                    <span className="opacity-50 line-through">Free </span>{" "}
-                    <span className="text-green-700">40</span>
-                  </span>
+                  <span>₹40</span>
                 ) : (
-                  <span className="flex space-x-2 items-center">
-                    <span className="opacity-50 line-through">40</span>
-                    <span className="text-green-700">Free </span>
-                  </span>
+                  <span className="text-green-600">Free</span>
                 )}
-              </div>
-
-              <hr />
-              <p className="font-bold opacity-60 pb-2">Have a Coupon?</p>
-              <div className="flex space-x-2 items-center">
-                <form>
-                  <input
-                    style={{
-                      height: "100%",
-                      border: "2px solid black",
-                      width: "150px",
-                      padding: "6px",
-                      marginRight: "1px",
-                    }}
-                    placeholder="APPLY10"
-                    value={couponCode}
-                    onChange={({ target }) => {
-                      setCouponCode(target.value);
-                    }}
-                  />
-                  {/* <span className="flex space-x-2 items-center">
-                <TagInput
-                  tags={couponCode}
-                  setTags={setCouponCode}
-                  inputFieldPosition="bottom"
-                /> */}
-
-                  <span className="buy_btn mx-1" onClick={handleCoupon}>
-                    Apply
-                  </span>
-                </form>
-              </div>
-              <hr />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total Amount</span>
-                <span className="text-green-700">
-                  {" "}
-                  ₹{" "}
-                  {coupon !== ""
-                    ? totalPrice * (coupon?.discount * 0.01)
-                    : totalPrice}
-                </span>
               </div>
             </div>
 
-            <hr />
-            <Button
+            {/* SAVINGS */}
+            <p className="text-green-600 text-sm font-medium">
+              You saved ₹{order?.discount} on this order 🎉
+            </p>
+
+            {/* COUPON */}
+            <div>
+              <p className="text-sm font-medium mb-2">Apply Coupon</p>
+
+              <form onSubmit={handleCoupon} className="flex gap-2 w-full">
+                <input
+                  type="text"
+                  placeholder="Enter code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="flex-1 min-w-[120px] px-3 py-2 border rounded-lg 
+                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-gray-800 text-white rounded-lg 
+                 hover:bg-black transition shrink-0"
+                >
+                  Apply
+                </button>
+              </form>
+            </div>
+
+            {/* TOTAL */}
+            <div className="flex justify-between font-semibold text-lg border-t pt-3">
+              <span>Total</span>
+              <span className="text-green-600">
+                ₹
+                {coupon
+                  ? totalPrice - (totalPrice * coupon.discount) / 100
+                  : totalPrice}
+              </span>
+            </div>
+
+            {/* CTA */}
+            <button
               onClick={handlePayment}
-              variant="contained"
-              type="submit"
-              sx={{ padding: ".8rem 2rem", marginTop: "2rem", width: "100%" }}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
             >
               Place Order
-            </Button>
+            </button>
           </div>
         </div>
       </div>

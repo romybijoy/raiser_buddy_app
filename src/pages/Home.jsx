@@ -1,175 +1,162 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Helmet from "../components/Helmet/Helmet";
-import { Container, Row, Col } from "reactstrap";
 import homeimg from "../assets/images/home.webp";
-// import products from '../assets/data/products'
-import "../styles/home.css";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Services from "../services/Services";
 import ProductsList from "../components/UI/ProductsList";
 import { useDispatch, useSelector } from "react-redux";
-
 import offerimg from "../assets/images/offer.jpeg";
 import Clock from "../components/UI/Clock";
-
-// import { useFetchProductsMutation, useFetchProductsQuery } from "../redux/slices/product/ProductApiSlice";
 import { showProduct } from "../redux/slices/ProductSlice";
 
 const Home = () => {
-  // const [trendingProducts, setTrendingProducts] = useState([]);
-  // const [bestSalesProducts, setBestSalesProducts] = useState([]);
-  // const [hillProducts, setHillProducts] = useState([]);
-  // const [popularProducts, setPopularProducts] = useState([]);
-
   const year = new Date().getFullYear();
 
-  const { products, fruitProducts, hillProducts, fertilizerProducts, loading } =
-    useSelector((state) => state.product);
-
+  const { products, loading } = useSelector((state) => state.product);
   const dispatch = useDispatch();
-  console.log(products);
+
   useEffect(() => {
     dispatch(showProduct());
-
-    // setTrendingProducts(products);
-    // // const filterdTrendingProducts = products.length > 0 ? products : trendingProducts;
-
-    // const filterdBestSalesProducts = products?.filter(
-    //   (item) => item.category.name === "Fruit"
-    // );
-
-    // setBestSalesProducts(filterdBestSalesProducts);
-
-    // const filterdHillProducts = products?.filter(
-    //   (item) => item.category.name === "Hill produce"
-    // );
-
-    // setHillProducts(filterdHillProducts);
-
-    // const filterdPopularProducts = products?.filter(
-    //   (item) => item.category.name === "Fertilizer"
-    // );
-
-    // setPopularProducts(filterdPopularProducts);
   }, [dispatch]);
 
   if (loading) {
-    return <h2>Loading</h2>;
+    return <h2 className="text-center mt-10">Loading...</h2>;
   }
 
   return (
-    <>
-      <Helmet title={"Home"}>
-        <section className="hero_section">
-          <Container>
-            <Row>
-              <Col lg="6" md="6">
-                <div className="hero_content">
-                  <p className="hero_subtitle">Trending Product in {year}</p>
-                  <h2>Fresh home made items</h2>
-                  <p>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Blanditiis at qui inventore quos incidunt deleniti veniam
-                    aliquid porro quod corrupti facere ipsam esse illo dolor,
-                    quo optio quidem magni quas.
-                  </p>
-                  <motion.button whileTap={{ scale: 1.2 }} className="buy_btn">
-                    <Link to="/shop">SHOP NOW</Link>
-                  </motion.button>
-                </div>
-              </Col>
-              <Col lg="6" md="6">
-                <div className="hero_img">
-                  <img src={homeimg} alt="" />
-                </div>
-              </Col>
-            </Row>
-          </Container>
-        </section>
+    <Helmet title={"Home"}>
+      {/* HERO SECTION */}
+      <section className="bg-gray-100 py-12">
+        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+          {/* Left */}
+          <div>
+            <p className="text-green-600 font-medium mb-2">
+              Trending Product in {year}
+            </p>
 
-        <Services />
-        <section className="trending_products">
-          <Container>
-            <Row>
-              <Col lg="12" className="text-center mb-1">
-                <h2 className="section_title">Trending Products</h2>
-              </Col>
-              {products && products?.length === 0 ? (
-                <h1 className="text-center fs-4">No products are found!</h1>
-              ) : (
-                <ProductsList data={products && products} />
-              )}
-            </Row>
-          </Container>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Fresh home made items
+            </h2>
+
+            <p className="text-gray-600 mb-6">
+              Raiser Buddy connects farmers directly with buyers, making it
+              easier to sell fresh, organic, and locally grown products with
+              trust and transparency.
+            </p>
+
+            <motion.button
+              whileTap={{ scale: 1.1 }}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+            >
+              <Link to="/shop">SHOP NOW</Link>
+            </motion.button>
+          </div>
+
+          {/* Right */}
+          <div>
+            <img
+              src={homeimg}
+              alt="home"
+              className="w-full rounded-lg shadow-md"
+            />
+          </div>
+        </div>
+      </section>
+
+      <Services />
+
+      {/* SECTION TEMPLATE */}
+      {[
+        { title: "Trending Products", data: products },
+        { title: "Best Sales", data: products },
+        { title: "New Arrivals", data: products },
+        { title: "Popular in Category", data: products },
+      ].map((section, index) => (
+        <section key={index} className="py-12">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-2xl font-semibold text-center mb-6">
+              {section.title}
+            </h2>
+
+            {section.data?.length === 0 ? (
+              <h1 className="text-center text-gray-500">
+                No products are found!
+              </h1>
+            ) : (
+              <ProductsList data={section.data} />
+            )}
+          </div>
         </section>
-        <section className="best_sales">
-          <Container>
-            <Row>
-              <Col lg="12" className="text-center mb-1">
-                <h2 className="section_title">Best Sales</h2>
-              </Col>
-              {products && products?.length === 0 ? (
-                <h1 className="text-center fs-4">No products are found!</h1>
-              ) : (
-                <ProductsList data={products && products} />
-              )}
-            </Row>
-          </Container>
-        </section>
-        <section className="timer_count">
-          <Container>
-            <Row>
-              <Col lg="6" md="12" className="count_down-col">
-                <div className="clock_top-content">
-                  <h4 className="text-white fs-6 mb-2">Limited Offers</h4>
-                  <h3 className="text-white fs-5 mb-3">Quality Fruits</h3>
-                </div>
+      ))}
+
+      {/* OFFER SECTION */}
+      <section className="py-14 bg-gradient-to-r from-green-600 via-green-500 to-green-400 text-white">
+        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+          {/* LEFT CONTENT */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-4"
+          >
+            <p className="uppercase tracking-wide text-sm text-white/80">
+              Limited Time Offer
+            </p>
+
+            <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+              Fresh Fruits at <span className="text-yellow-300">30% OFF</span>
+            </h2>
+
+            <p className="text-sm md:text-base text-white/90">
+              Enjoy farm-fresh, organic fruits directly from farmers. Healthy,
+              affordable, and delivered with trust.
+            </p>
+
+            <p className="text-yellow-200 font-medium">
+              Hurry! Offer ends soon ⏳
+            </p>
+
+            {/* TIMER */}
+            <div className="flex items-center gap-4 mt-4">
+              <div className="bg-white/20 backdrop-blur-md shadow-md p-4 rounded-lg">
                 <Clock />
-                <motion.button
-                  whileTap={{ scale: 1.2 }}
-                  className="buy_btn store_btn"
-                >
-                  <Link to="/shop">Visit Store</Link>
-                </motion.button>
-              </Col>
-              <Col lg="6" md="12" className="text-end counter_img">
-                <img src={offerimg} alt="" />
-              </Col>
-            </Row>
-          </Container>
-        </section>
-        <section className="new_arrivals">
-          <Container>
-            <Row>
-              <Col lg="12" className="text-center mb-1">
-                <h2 className="section_title">New Arrivals</h2>
-              </Col>
-              {products?.length === 0 ? (
-                <h1 className="text-center fs-4">No products are found!</h1>
-              ) : (
-                <ProductsList data={products && products} />
-              )}
-            </Row>
-          </Container>
-        </section>
-        <section className="popular_category">
-          <Container>
-            <Row>
-              <Col lg="12" className="text-center mb-1">
-                <h2 className="section_title">Popular in Category</h2>
-              </Col>
+              </div>
 
-              {products?.length === 0 ? (
-                <h1 className="text-center fs-4">No products are found!</h1>
-              ) : (
-                <ProductsList data={products && products} />
-              )}
-            </Row>
-          </Container>
-        </section>
-      </Helmet>
-    </>
+              <motion.button
+                whileTap={{ scale: 1.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="bg-white text-green-600 px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-gray-100 transition duration-200"
+              >
+                <Link to="/shop">Shop Now</Link>
+              </motion.button>
+            </div>
+          </motion.div>
+
+          {/* RIGHT IMAGE */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="relative"
+          >
+            {/* Glow Effect */}
+            <div className="absolute inset-0 bg-white/10 blur-xl opacity-60 rounded-full"></div>
+
+            <img
+              src={offerimg}
+              alt="offer"
+              className="relative w-full max-h-[300px] object-contain drop-shadow-xl rounded-xl shadow-2xl"
+            />
+
+            {/* Discount Badge */}
+            <div className="absolute top-4 right-4 bg-yellow-400 text-black font-bold px-3 py-1 rounded-full shadow-lg">
+              30% OFF
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </Helmet>
   );
 };
 

@@ -1,91 +1,88 @@
-import React from 'react'
-import './footer.css'
-import {Container, Row, Col, ListGroup, ListGroupItem} from 'reactstrap';
-import { Link } from 'react-router-dom';
-
+import React from "react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
+  const year = new Date().getFullYear();
 
-  const year= new Date().getFullYear();
   return (
-    <footer className='footer'>
-      <Container>
-        <Row>
-          <Col lg="4" md="6" className="mb-4">
-          <div className="logo">
-          <div>
-            <h1 className='text-white'>Raiser Buddy</h1>
-          </div>
-         </div>
-         <p className="footer_text mt-4">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Est error commodi qui vero, veritatis nemo consequuntur excepturi aliquid. Nesciunt, eveniet.
+    <footer className="bg-gray-900 text-gray-300 py-10">
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Logo Section */}
+        <div>
+          <h1 className="text-white text-2xl font-bold">Raiser Buddy</h1>
+          <p className="mt-4 text-white text-sm leading-6">
+            Raiser Buddy connects farmers directly with buyers, making it easier
+            to sell fresh, organic, and locally grown products with complete
+            trust and transparency.
           </p>
-          </Col>
-          <Col lg="3" md="3" className="mb-4">
-          <div className="footer_quick-links">
-            <h4 className="quick_links-title">
-              Top Categories</h4>
-              <ListGroup>
-                <ListGroupItem className="ps-0 border-0">
-                  <Link to="#">Fruits</Link>
-                </ListGroupItem>
-                <ListGroupItem className="ps-0 border-0">
-                  <Link to="#">Vegetables</Link>
-                </ListGroupItem>
-                <ListGroupItem className="ps-0 border-0">
-                  <Link to="#">Hill Produce</Link>
-                </ListGroupItem>
-                <ListGroupItem className="ps-0 border-0">
-                  <Link to="#">Organic Fertilizer</Link>
-                </ListGroupItem>
-               </ListGroup>
-              </div></Col>
-          <Col lg="2" md="3" className="mb-4">
-          <div className="footer_quick-links">
-            <h4 className="quick_links-title">
-              Useful Links</h4>
-              <ListGroup>
-                <ListGroupItem className="ps-0 border-0">
-                  <Link to="/shop">Shop</Link>
-                </ListGroupItem>
-                {/* <ListGroupItem>
-                  <Link to="#">Cart</Link>
-                </ListGroupItem> */}
-                <ListGroupItem className="ps-0 border-0">
-                  <Link to="#">Login</Link>
-                </ListGroupItem>
-                <ListGroupItem className="ps-0 border-0">
-                  <Link to="#">Privacy Policy</Link>
-                </ListGroupItem>
-               </ListGroup>
-              </div></Col>
-          <Col lg="3" md="4">
-          <div className="footer_quick-links">
-            <h4 className="quick_links-title">
-              Contact</h4>
-              <ListGroup className="footer-contact">
-                <ListGroupItem className="ps-0 border-0 d-flex align-items-center gap-2">
-                  <span><i className="ri-map-pin-line"></i></span>
-                  <p>No.20 Sreekandapuram, Kannur, Kerala</p>
-                </ListGroupItem>
-                <ListGroupItem className="ps-0 border-0 d-flex align-items-center gap-2">
-                <span><i className="ri-phone-line"></i></span>
-                <p>+911234567896</p>
-                </ListGroupItem>
-                <ListGroupItem className="ps-0 border-0 d-flex align-items-center gap-2">
-                <span><i className="ri-mail-line"></i></span>
-                <p>raiserbuddy@gmail.com</p>
-                </ListGroupItem>
-               </ListGroup>
-              </div>
-              </Col>
-              <Col lg="12">
-              <p className="footer_copyright">Copyright {year} developed by Romy. All rights reserved.</p>
-              </Col>
-        </Row>
-      </Container>
-    </footer>
-  )
-}
+        </div>
 
-export default Footer
+        {/* Categories */}
+        <div>
+          <h4 className="text-white font-semibold mb-4">Top Categories</h4>
+          <ul className="space-y-2">
+            <li>
+              <Link to="#" className="hover:text-white">
+                Fruits
+              </Link>
+            </li>
+            <li>
+              <Link to="#" className="hover:text-white">
+                Vegetables
+              </Link>
+            </li>
+            <li>
+              <Link to="#" className="hover:text-white">
+                Hill Produce
+              </Link>
+            </li>
+            <li>
+              <Link to="#" className="hover:text-white">
+                Organic Fertilizer
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Links */}
+        <div>
+          <h4 className="text-white font-semibold mb-4">Useful Links</h4>
+          <ul className="space-y-2">
+            <li>
+              <Link to="/shop" className="hover:text-white">
+                Shop
+              </Link>
+            </li>
+            <li>
+              <Link to="/login" className="hover:text-white">
+                Login
+              </Link>
+            </li>
+            <li>
+              <Link to="#" className="hover:text-white">
+                Privacy Policy
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Contact */}
+        <div>
+          <h4 className="text-white font-semibold mb-4">Contact</h4>
+          <ul className="space-y-3 text-sm">
+            <li>📍 Kannur, Kerala</li>
+            <li>📞 +91 1234567896</li>
+            <li>✉️ raiserbuddy@gmail.com</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Bottom */}
+      <div className="text-center text-sm text-gray-500 mt-10 border-t border-gray-700 pt-4">
+        © {year} developed by Romy. All rights reserved.
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

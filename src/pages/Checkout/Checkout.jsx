@@ -1,104 +1,95 @@
-import * as React from "react";
-import Box from "@mui/material/Box";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
+import React from "react";
 import AddDeliveryAddressForm from "./AddAddress";
 import { useLocation, useNavigate } from "react-router-dom";
 import OrderSummary from "./OrderSummary";
 import PaymentMethod from "./PaymentMethod";
 
-const steps = ["Login", "Delivery Adress", "Order Summary", "Payment Method"];
+const steps = ["Login", "Delivery Address", "Order Summary", "Payment"];
 
 export default function Checkout() {
-  const [activeStep, setActiveStep] = React.useState(1);
-  const [skipped, setSkipped] = React.useState(new Set());
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const step = queryParams.get("step");
   const navigate = useNavigate();
 
-  console.log("step", step);
-
-  const handleNext = () => {
-    let newSkipped = skipped;
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
-  };
+  const queryParams = new URLSearchParams(location.search);
+  const step = Number(queryParams.get("step")) || 1;
 
   const handleBack = () => {
     navigate(`/checkout?step=${step - 1}`);
   };
 
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const handlePayment = () => {
-    console.log("handle payment");
-  };
-
   return (
-    <Box className="px-5 lg:px-32 " sx={{ width: "100%" }}>
-      <Stepper activeStep={Number(step)}>
-        {steps.map((label, index) => {
-          const stepProps = {};
-          const labelProps = {};
+    <div className="bg-gray-50 min-h-screen px-4 lg:px-20 py-6">
+      {/* 🔹 STEPPER */}
+      <div className="max-w-5xl mx-auto mb-6">
+        <div className="flex items-center justify-between">
+          {steps.map((label, index) => {
+            const stepNumber = index + 1;
+            const isActive = step === stepNumber;
+            const isCompleted = step > stepNumber;
 
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
-            </Step>
-          );
-        })}
-      </Stepper>
-      {activeStep === steps.length ? (
-        <React.Fragment>
-          <Typography sx={{ mt: 2, mb: 1 }}>
-            All steps completed - you&apos;re finished
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-            <Box sx={{ flex: "1 1 auto" }} />
-            <Button onClick={handleReset}>Reset</Button>
-          </Box>
-        </React.Fragment>
-      ) : (
-        <React.Fragment>
-          <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
-            <Button
-              color="inherit"
-              disabled={step == 2}
-              onClick={handleBack}
-              sx={{ mr: 1 }}
-            >
-              Back
-            </Button>
-            <Box sx={{ flex: "1 1 auto" }} />
-          </Box>
-          {/* <Typography sx={{ my: 6 }}>Title</Typography> */}
+            return (
+              <div key={index} className="flex-1 flex items-center">
+                {/* Circle */}
+                <div
+                  className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold
+                    ${
+                      isCompleted
+                        ? "bg-green-500 text-white"
+                        : isActive
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-300 text-gray-600"
+                    }`}
+                >
+                  {isCompleted ? "✓" : stepNumber}
+                </div>
 
-          <div className="my-5">
-            {step == 2 ? (
-              <AddDeliveryAddressForm handleNext={handleNext} />
-            )  : (
-              step == 4 ?
-              (<PaymentMethod/>)
-              :
+                {/* Label */}
+                <p
+                  className={`ml-2 text-sm font-medium hidden sm:block
+                    ${
+                      isActive
+                        ? "text-blue-600"
+                        : isCompleted
+                          ? "text-green-600"
+                          : "text-gray-500"
+                    }`}
+                >
+                  {label}
+                </p>
 
-             ( <OrderSummary />)
-            )
-          }
-          
-            
-           
-          </div>
+                {/* Line */}
+                {index !== steps.length - 1 && (
+                  <div className="flex-1 h-[2px] bg-gray-300 mx-2"></div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
-          {/* <AddDeliveryAddressForm handleNext={handleNext} /> */}
-        </React.Fragment>
-      )}
-    </Box>
+      {/* 🔹 BACK BUTTON */}
+      <div className="max-w-5xl mx-auto flex justify-between mb-4">
+        <button
+          onClick={handleBack}
+          disabled={step === 1}
+          className="text-gray-600 hover:text-black disabled:opacity-50"
+        >
+          ← Back
+        </button>
+      </div>
+
+      {/* 🔹 CONTENT */}
+      <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border p-5">
+        {step === 2 ? (
+          <AddDeliveryAddressForm
+            handleNext={() => navigate("/checkout?step=3")}
+          />
+        ) : step === 4 ? (
+          <PaymentMethod />
+        ) : (
+          <OrderSummary />
+        )}
+      </div>
+    </div>
   );
 }

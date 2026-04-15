@@ -1,168 +1,148 @@
-import {
-  Button,
-  Divider,
-  Grid,
-  Rating,
-  TextField,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
 import React, { useEffect, useState } from "react";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import { useDispatch, useSelector } from "react-redux";
-import { createReview, createRating } from "../../redux/slices/ReviewSlice";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { fetchProductById, showProduct } from "../../redux/slices/ProductSlice";
-import { showRating } from "../../redux/slices/ReviewSlice";
-
+import {
+  createReview,
+  createRating,
+  showRating,
+} from "../../redux/slices/ReviewSlice";
+import { useLocation, useNavigate } from "react-router-dom";
+import { fetchProductById } from "../../redux/slices/ProductSlice";
 import { toast } from "react-toastify";
 
 const RateProduct = () => {
   const [formData, setFormData] = useState({ title: "", description: "" });
-  const [proData, setProData] = useState("");
-  const [rating, setRating] = useState();
-  const isLargeScreen = useMediaQuery("(min-width:1200px)");
+  const [rating, setRating] = useState(0);
+
   const dispatch = useDispatch();
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const { productId } = location.state || {};
   const { product } = useSelector((state) => state.product);
 
   useEffect(() => {
-    const input = { productId: Number(productId) };
-    dispatch(fetchProductById(input));
-
-    dispatch(showRating(productId));
-
-    console.log("product", productId);
     if (productId) {
-      setProData(product);
+      dispatch(fetchProductById({ productId: Number(productId) }));
+      dispatch(showRating(productId));
     }
   }, [productId]);
 
-  const handleRateProduct = (e, value) => {
-    console.log("rating ----- ", value);
-    setRating(value);
-  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const handleChange = (e) => {
-    const name = e.target.name;
-    const value = e.target.value;
-
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    console.log(formData);
-    // You can customize this handler to handle the form data as needed
-    if (formData !== null || formData !== "") {
-      dispatch(
-        createReview({
-          review: formData.title,
-          productId: productId,
-          rating: rating,
-        })
-      );
+    if (!formData.title.trim() || !rating) {
+      toast.error("Please add rating and review");
+      return;
     }
-    dispatch(createRating({ rating: rating, productId: productId }));
-    setFormData({ title: "", description: "" });
-    toast.success("Review & Rating added successfully");
-    navigate(`/product/${productId}`);
 
+    dispatch(
+      createReview({
+        review: formData.title,
+        productId,
+        rating,
+      }),
+    );
+
+    dispatch(createRating({ rating, productId }));
+
+    toast.success("Review added successfully");
+    navigate(`/product/${productId}`);
   };
 
   return (
-    <div className="px-5 lg:px-20">
-      <h1 className="text-xl p-5 shadow-lg mb-8 font-bold">
-        Rate & Review Product
-      </h1>
-      <Grid sx={{ justifyContent: "space-between" }} container>
-        <Grid
-          className="flex  lg:items-center shadow-lg border rounded-md p-5"
-          item
-          xs={12}
-          lg={5.8}
-        >
-          <div>
-            <img
-              className="w-[5rem] lg:w-[15rem]"
-              src={product && product?.images[0]}
-              alt=""
-            />
-          </div>
-          <div className="ml-3 lg:ml-5 space-y-2 lg:space-y-4">
-            <p className="lg:text-lg">{product?.name}</p>
-            <p className="opacity-50 font-semibold">{product?.desc}</p>
-            <p>₹{product?.price}</p>
-            {/* <p>Size: Free</p>
-           {product.product?.color && <p>Color: {product.product?.color}</p>} */}
-            <div className="flex items-center space-x-3">
-              <Rating name="read-only" value={product?.avgRating} precision={0.5} readOnly />
+    <div className="bg-gray-50 min-h-screen px-4 lg:px-20 py-8">
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* HEADER */}
+        <h1 className="text-xl font-semibold bg-white p-4 rounded-xl shadow-sm border">
+          Rate & Review Product
+        </h1>
 
-              {/* <p className="opacity-60 text-sm">42807 Ratings</p> */}
-              {/* <p className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                {3789} reviews
-              </p> */}
-            </div>
-            <div>
-              <p className="space-y-2 font-semibold">
-                <FiberManualRecordIcon
-                  sx={{ width: "15px", height: "15px" }}
-                  className="text-green-600  mr-2"
-                />
-                <span>Delivered On Mar 03</span>{" "}
-              </p>
-              <p className="text-xs">Your Item Has Been Delivered</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* LEFT: PRODUCT */}
+          <div className="bg-white border rounded-xl shadow-sm p-5 flex gap-4">
+            <img
+              src={product?.images?.[0] || "/placeholder.png"}
+              alt=""
+              className="w-24 h-24 lg:w-40 lg:h-40 object-cover rounded-lg border"
+            />
+
+            <div className="space-y-2">
+              <h2 className="font-semibold text-lg">{product?.name}</h2>
+              <p className="text-gray-500 text-sm">{product?.desc}</p>
+              <p className="font-semibold">₹{product?.price}</p>
+
+              {/* Existing Rating */}
+              <div className="flex items-center gap-1 text-yellow-400">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span key={star}>
+                    {product?.avgRating >= star ? "★" : "☆"}
+                  </span>
+                ))}
+              </div>
+
+              <p className="text-sm text-green-600">Delivered successfully</p>
             </div>
           </div>
-        </Grid>
-        <Grid item xs={12} lg={6}>
-          <div className={`${!isLargeScreen ? "py-10" : ""} space-y-5`}>
-            <div className="shadow-md border rounded-md p-5">
-              <Typography className="font-semibold" component="legend">
-                Rate This Product
-              </Typography>
-              <Rating
-                name="simple-controlled"
-                value={rating}
-                onChange={(event, newValue) => {
-                  handleRateProduct(event, newValue);
-                }}
-              />
+
+          {/* RIGHT: REVIEW */}
+          <div className="space-y-5">
+            {/* ⭐ RATING */}
+            <div className="bg-white border rounded-xl shadow-sm p-5">
+              <p className="font-medium mb-2">Rate this product</p>
+
+              <div className="flex gap-2 text-2xl cursor-pointer">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    onClick={() => setRating(star)}
+                    className={
+                      rating >= star ? "text-yellow-400" : "text-gray-300"
+                    }
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
             </div>
+
+            {/* ✍ REVIEW FORM */}
             <form
               onSubmit={handleSubmit}
-              className="space-y-5 p-5 shadow-md border rounded-md"
+              className="bg-white border rounded-xl shadow-sm p-5 space-y-4"
             >
-              <TextField
-                label="Title"
-                variant="outlined"
-                fullWidth
-                margin="normal"
+              <input
+                type="text"
+                placeholder="Review title"
                 value={formData.title}
-                onChange={handleChange}
-                name="title"
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+                className="input"
               />
-              <TextField
-                label="Description"
-                variant="outlined"
-                fullWidth
-                margin="normal"
-                multiline
+
+              <textarea
+                placeholder="Write your review..."
                 rows={4}
                 value={formData.description}
-                onChange={handleChange}
-                name="description"
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    description: e.target.value,
+                  })
+                }
+                className="input"
               />
-              <Button type="submit" variant="contained" color="primary">
+
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
                 Submit Review
-              </Button>
+              </button>
             </form>
           </div>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </div>
   );
 };

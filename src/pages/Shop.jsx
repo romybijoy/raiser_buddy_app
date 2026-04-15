@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-
 import CommonSection from "../components/UI/CommonSection";
 import Helmet from "../components/Helmet/Helmet";
-import { Col, Container, Row } from "reactstrap";
 
 import "../styles/shop.css";
-// import products from "../assets/data/products";
 import ProductList from "../components/UI/ProductsList";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -18,52 +15,73 @@ import { showCategory } from "../../src/redux/slices/CategorySlice";
 
 const Shop = () => {
   const { categories } = useSelector((state) => state.category);
-  const { products, product, loading } = useSelector((state) => state.product);
+  const { products } = useSelector((state) => state.product);
+
   const [productsData, setProductsData] = useState([]);
   const dispatch = useDispatch();
 
+  // ✅ Initial load
   useEffect(() => {
     dispatch(showProduct());
     dispatch(showCategory({ page: 0, pageSize: 30 }));
+  }, []);
 
+  // ✅ Sync products
+  useEffect(() => {
     setProductsData(products);
-  }, [productsData]);
+  }, [products]);
 
   const handleFilter = (e) => {
-    e.preventDefault();
-    dispatch(fetchProductByCategory(Number(e.target.value)));
+    const value = Number(e.target.value);
 
-    if(e.target.value ==0){
+    if (value === 0) {
       dispatch(showProduct());
+    } else {
+      dispatch(fetchProductByCategory(value));
     }
-    // setProductsData(products);
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const searchTerm = e.target.value;
-    const searchedProducts = products.filter((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setProductsData(searchedProducts);
   };
 
   const handleOrderFilter = (e) => {
-    e.preventDefault();
-    dispatch(showShopProduct({ order: e.target.value }));
-    return products;
+    const order = e.target.value;
+
+    let sortedProducts = [...products];
+
+    if (order === "asc") {
+      sortedProducts.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (order === "desc") {
+      sortedProducts.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    setProductsData(sortedProducts);
+  };
+
+  const handleSearch = (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+
+    const filtered = products.filter((item) =>
+      item.name.toLowerCase().includes(searchTerm),
+    );
+
+    setProductsData(filtered);
   };
 
   return (
     <Helmet title="Shop">
-      <CommonSection title="Products" />
-      <section>
-        <Container>
-          <Row>
-            <Col lg="3" md="6">
-              <div className="filter_widget">
-                <select onChange={handleFilter}>
-                  <option value={0}>All</option>
+      <div className="bg-gray-50 min-h-screen">
+        <CommonSection title="Products" />
+
+        {/* FILTER SECTION */}
+        <section className="px-4 -mt-10 pb-4">
+          <div className="max-w-7xl mx-auto rounded-2xl bg-white border border-gray-200 shadow-sm p-4">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              {/* Category */}
+              <div className="w-full md:w-1/4">
+                <select
+                  onChange={handleFilter}
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-50 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={0}>All Categories</option>
                   {categories?.map((category, i) => (
                     <option key={i} value={category.categoryId}>
                       {category.name}
@@ -71,45 +89,54 @@ const Shop = () => {
                   ))}
                 </select>
               </div>
-            </Col>
-            <Col lg="3" md="6" className="text-end">
-              <div className="filter_widget">
-                <select onChange={handleOrderFilter}>
-                  <option value=''>Sort By</option>
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </div>
-            </Col>
-            {/* <Col lg="6" md="12">
-              <div className="search_box">
+
+              {/* Search */}
+              <div className="w-full md:flex-1 relative">
                 <input
                   type="text"
-                  placeholder="Search... "
+                  placeholder="Search for products..."
                   onChange={handleSearch}
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border bg-white border-gray-300
+                     focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span>
-                  <i className="ri-search-line"></i>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                  🔍
                 </span>
               </div>
-            </Col> */}
-          </Row>
-        </Container>
-      </section>
 
-      <section>
-        <Container>
-          <Row>
+              {/* Sort */}
+              <div className="w-full md:w-1/5">
+                <select
+                  onChange={handleOrderFilter}
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-50 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Sort</option>
+                  <option value="asc">Name: A → Z</option>
+                  <option value="desc">Name: Z → A</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PRODUCTS SECTION */}
+        <section className="px-4 pb-10">
+          <div className="max-w-7xl mx-auto">
+            <p className="text-sm text-gray-500 mb-4">
+              Showing {productsData.length} results
+            </p>
+
             {products?.length === 0 || productsData?.length === 0 ? (
-              <h1 className="text-center fs-4">No products are found!</h1>
+              <h1 className="text-center text-lg font-medium text-gray-600">
+                No products are found!
+              </h1>
             ) : (
-              <ProductList
-                data={products.length > 0 ? products : productsData}
-              />
+              <ProductList data={productsData} />
             )}
-          </Row>
-        </Container>
-      </section>
+          </div>
+        </section>
+      </div>
     </Helmet>
   );
 };

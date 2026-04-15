@@ -1,440 +1,283 @@
 import React, { useState, useRef, useEffect } from "react";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/CommonSection";
-import { Col, Container, Row } from "reactstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import ProductReviewCard from "./ProductReviewCard";
-import { Box, Tooltip, Grid, LinearProgress, Rating } from "@mui/material";
 import "../styles/product-details.css";
 
 import ProductsList from "../components/UI/ProductsList";
 import { fetchProductById, showProduct } from "../redux/slices/ProductSlice";
 import { showReviews } from "../redux/slices/ReviewSlice";
 import { addToCart } from "../redux/slices/CartSlice";
-import MyReactImageMagnify from "../components/common/MyReactImageMagnify";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import ZoomImage from "../components/common/ZoomImage";
 
 const ProductDetails = () => {
   const [tab, setTab] = useState("desc");
-  const [data, setData] = useState("");
   const reviewUser = useRef("");
   const reviewMsg = useRef("");
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const { productId } = useParams();
+
   const { product, products } = useSelector((state) => state.product);
-
   const { reviews } = useSelector((state) => state.review);
-  console.log(productId);
+
   const [activeImage, setActiveImage] = useState("");
-
-  const [rating, setRating] = useState(null);
-
-  // dispatch(fetchProductById(productId));
 
   useEffect(() => {
     const input = { productId: Number(productId) };
     dispatch(fetchProductById(input));
     dispatch(showProduct());
     dispatch(showReviews(input));
-    setData(product);
   }, [productId]);
 
   const relatedProducts = products.filter(
-    (item) => item?.category?.categoryId === product?.category?.categoryId
+    (item) => item?.category?.categoryId === product?.category?.categoryId,
   );
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-
-    const reviewUserName = reviewUser.current.value;
-    const reviewUserMsg = reviewMsg.current.value;
-  };
 
   const handleSetActiveImage = (image) => {
     setActiveImage(image);
   };
 
   const handleSubmit = () => {
-    dispatch(addToCart({ productId: productId }));
-    // dispatch(showCart())
+    dispatch(addToCart({ productId }));
     navigate("/cart");
+  };
+
+  const ratingCounts = {
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0,
+  };
+
+  reviews.forEach((review) => {
+    const r = Math.round(review.rating);
+    if (ratingCounts[r] !== undefined) {
+      ratingCounts[r]++;
+    }
+  });
+
+  const totalReviews = reviews.length;
+  // ⭐ Custom Star Rating (Tailwind)
+  const StarRating = ({ value = 0 }) => {
+    return (
+      <div className="flex items-center gap-1 text-yellow-400">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span key={star}>
+            {value >= star ? "★" : value >= star - 0.5 ? "☆" : "☆"}
+          </span>
+        ))}
+      </div>
+    );
   };
 
   return (
     <Helmet title={product?.name}>
       <CommonSection title="Product Details" subtitle={product?.name} />
 
-      <section className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-2 px-4 pt-10">
-        <div className="flex flex-col items-center shadow-md">
-          <div
-            className="rounded-lg max-w-[30rem] max-h-[35rem] mt-5 "
-            // style={{ width: "469px", height: "338px" }}
-          >
+      {/* TOP SECTION */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-10 px-4 pt-10">
+        {/* IMAGE SECTION */}
+        <div className="flex flex-col items-center shadow-md p-4 rounded-lg">
+          <div className="rounded-lg max-w-[30rem] max-h-[35rem]">
             <ZoomImage
-              image={
-                activeImage || (product ? product?.images[0] : activeImage)
-              }
+              image={activeImage || (product ? product?.images[0] : "")}
             />
           </div>
-          <div className="flex flex-wrap space-x-5 justify-center">
+
+          <div className="flex flex-wrap gap-3 justify-center mt-4">
             {product?.images?.map((image, i) => (
               <div
                 key={i}
                 onClick={() => handleSetActiveImage(image)}
-                className="aspect-h-2 aspect-w-3 overflow-hidden rounded-lg max-w-[5rem] max-h-[5rem] mt-4"
+                className="w-16 h-16 rounded-lg overflow-hidden cursor-pointer border hover:scale-105 transition"
               >
                 <img
                   src={image}
-                  alt={product?.images[i]}
-                  className="h-full w-full object-cover object-center"
+                  alt=""
+                  className="w-full h-full object-cover"
                 />
               </div>
             ))}
           </div>
         </div>
-       
-        <div className="product-details p-6 bg-white rounded-md shadow-md">
-          <h2 className="text-lg lg:text-xl font-bold text-gray-800">
-            {product?.name}
-          </h2>
-          <div className="product-rating flex items-center gap-2 mb-3">
-            <Tooltip
-              title={`Average Rating: ${
-                product?.avgRating  ? Number(product.avgRating?.toFixed(2)) : 0
-              }`}
-              placement="top-start"
-            >
-              <Box>
-                <Rating
-                  name="decimal-rating"
-                  value={product?.avgRating}
-                  precision={0.5}
-                  readOnly
-                />
-              </Box>
-            </Tooltip>
-            <p className="text-gray-600">
-              (<span>{reviews.length}</span> ratings)
+
+        {/* DETAILS SECTION */}
+        <div className="p-6 bg-white rounded-lg shadow-md">
+          <h2 className="text-xl font-bold text-gray-800">{product?.name}</h2>
+
+          {/* Rating */}
+          <div className="flex items-center gap-2 mt-2">
+            <div className="text-yellow-400 text-lg">
+              <StarRating value={product?.avgRating || 0} />
+            </div>
+            <p className="text-gray-500 text-sm">({reviews.length} ratings)</p>
+          </div>
+
+          {/* Category & Description */}
+          <div className="mt-4">
+            {product?.category?.name && (
+              <h1 className="text-lg font-semibold text-gray-900">
+                {product.category.name} Category
+              </h1>
+            )}
+            {product?.shortDesc && (
+              <p className="text-gray-700 mt-2">{product.shortDesc}</p>
+            )}
+          </div>
+
+          {/* Price */}
+          <div className="mt-6 flex items-center gap-3 text-lg font-medium">
+            <p className="text-green-600 font-bold text-xl">
+              ₹{product.specialPrice}
+            </p>
+
+            <p className="line-through text-gray-400 text-sm">
+              ₹{product.price}
+            </p>
+
+            <p className="text-green-600 text-sm font-semibold">
+              {product.discount}% Off
             </p>
           </div>
 
-          <div className="product-info mx-auto max-w-2xl px-4 pb-6 lg:max-w-5xl lg:px-8 lg:pb-24">
-            <div>
-              <h1 className="text-xl font-semibold tracking-tight text-gray-900">
-                {product?.category?.name} Category
-              </h1>
-              <p className="text-lg text-gray-700 pt-2">{product?.shortDesc}</p>
-            </div>
-
-            <div className="mt-6">
-              <h2 className="sr-only">Product information</h2>
-              <div className="flex space-x-4 items-center text-lg lg:text-xl font-medium text-gray-900 mt-4">
-                <p className="text-xl font-bold text-green-600">
-                  ₹{product?.specialPrice}
-                </p>
-                <p className="text-xl line-through text-gray-400">
-                  ₹{product?.price}
-                </p>
-                <p className="text-xl text-green-600">
-                  {product?.discount}% Off
-                </p>
-              </div>
-
-              <div className="pt-4">
-                {product?.quantity > 0 ? (
-                  <p className="text-lg font-semibold">
-                    <span className="font-medium">
-                      {product?.quantity} Kg left
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-lg font-bold text-red-600">Out Of Stock</p>
-                )}
-              </div>
-            </div>
-
-            <div className="pt-6">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Provider Contact Info
-              </h3>
-              <div className="mt-2 space-y-1 text-gray-700">
-                <p>{product?.provider?.name}</p>
-                <p>
-                  {product?.provider?.type === "INDIVIDUAL"
-                    ? "Farmer"
-                    : "Company"}
-                </p>
-                <p>{product?.provider?.mobile_number}</p>
-                <p>{product?.provider?.email}</p>
-                <p>{`${product && product?.provider?.address?.house_name}, ${ product && product?.provider?.address?.place}, ${product && product?.provider?.address?.district} - ${product && product?.provider?.address?.zipcode}`}</p>
-              </div>
-            </div>
+          {/* Stock */}
+          <div className="mt-4">
+            {product?.quantity > 0 ? (
+              <p className="mt-4 font-semibold text-orange-600">
+                Only {product.quantity} Kg left
+              </p>
+            ) : (
+              <p className="text-red-600 font-bold">Out Of Stock</p>
+            )}
           </div>
 
-          <motion.button
-            whileTap={{ scale: 1.2 }}
-            className="buy-btn bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onClick={handleSubmit}
-            disabled={product?.quantity === 0}
-          >
-            Add to Cart
-          </motion.button>
-        </div>
+          {/* Provider Info */}
+          {product?.provider && (
+            <div className="mt-6">
+              <h3 className="font-semibold text-gray-800 mb-1">
+                Provider Contact Info
+              </h3>
 
-       
+              <div className="mt-3 space-y-1 text-gray-600 text-sm">
+                <p>{product?.provider?.name}</p>
+                <p>{product?.provider?.mobile_number}</p>
+                <p>{product?.provider?.email}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Button */}
+          <div className="border-t mt-3 pt-3">
+            <motion.button
+              whileTap={{ scale: 1.1 }}
+              className="mt-3 px-6 py-2.5 bg-blue-600 text-white rounded-lg 
+           font-semibold hover:bg-blue-700 transition"
+              onClick={handleSubmit}
+              disabled={product?.quantity === 0}
+            >
+              Add to Cart
+            </motion.button>
+          </div>
+        </div>
       </section>
 
-      <section>
-        <Container>
-          <Row>
-            <Col lg="12">
-              <div className="tab_wrapper d-flex align-items-center gap-5">
-                <h6
-                  className={`${tab === "desc" ? "active_tab" : ""}`}
-                  onClick={() => setTab("desc")}
-                >
-                  Description
-                </h6>
-                <h6
-                  className={`${tab === "rev" ? "active_tab" : ""}`}
-                  onClick={() => setTab("rev")}
-                >
-                  Reviews ({reviews?.length})
-                </h6>
+      {/* TAB SECTION */}
+      <section className="px-4 lg:px-10 py-10">
+        <div className="max-w-7xl mx-auto">
+          {/* Tabs */}
+          <div className="flex gap-6 border-b pb-3">
+            <h6
+              className={`cursor-pointer ${
+                tab === "desc" ? "text-blue-600 font-semibold" : "text-gray-500"
+              }`}
+              onClick={() => setTab("desc")}
+            >
+              Description
+            </h6>
+
+            <h6
+              className={`cursor-pointer ${
+                tab === "rev" ? "text-blue-600 font-semibold" : "text-gray-500"
+              }`}
+              onClick={() => setTab("rev")}
+            >
+              Reviews ({reviews?.length})
+            </h6>
+          </div>
+
+          {/* Description */}
+          {tab === "desc" ? (
+            <div className="mt-5">
+              <h3 className="font-bold pb-2">Description</h3>
+              <p>{product?.desc}</p>
+            </div>
+          ) : (
+            <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Reviews */}
+              <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {product?.reviews?.length ? (
+                  product.reviews.map((item, i) => (
+                    <ProductReviewCard key={i} item={item} />
+                  ))
+                ) : (
+                  <h2>No reviews yet!</h2>
+                )}
               </div>
 
-              {tab === "desc" ? (
-                <div className="tab_content mt-5">
-                  <h3 className="font-bold pb-2">Description</h3>
-                  <p>{product?.desc}</p>
+              {/* Ratings Summary */}
+              <div>
+                <h1 className="text-lg font-semibold">Product Ratings</h1>
 
-                  <div className="pt-2 ">
-                    <h3 className="font-bold pb-2">Specification</h3>
-                    <p>
-                      Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                      Qui blanditiis enim reiciendis, id, officia, dolorem eaque
-                      sint ex eligendi eveniet sapiente? Ad harum fugiat atque
-                      accusamus quas necessitatibus aliquid distinctio. Lorem
-                      ipsum dolor sit amet consectetur adipisicing elit.
-                      Placeat, tempore iusto quo magnam nihil unde, illum vero
-                      sed reprehenderit quas et tenetur itaque! Iusto ducimus ut
-                      rem necessitatibus sed culpa laboriosam nemo, harum amet
-                      sunt labore id facere maxime dolore excepturi. Animi
-                      expedita assumenda quidem rem reiciendis unde deleniti
-                      porro adipisci a natus perferendis nostrum neque beatae,
-                      cumque corrupti nisi placeat, qui possimus? Dolores
-                      doloremque, voluptates libero modi quas numquam nobis
-                      itaque sunt tempore odit ex est mollitia officiis
-                      obcaecati iure corrupti quaerat error. Pariatur ipsam
-                      repellat neque explicabo quas ea sed architecto iure quis
-                      perferendis. Fugiat hic vitae veniam.
-                    </p>
-                  </div>
+                <div className="flex items-center gap-3 mt-2">
+                  <StarRating value={product?.avgRating || 0} />
+                  <p className="text-gray-500">{reviews.length} Ratings</p>
                 </div>
-              ) : (
-                <section className="">
-                  <h1 className="font-semibold text-lg pb-4">
-                    Recent Review & Ratings
-                  </h1>
 
-                  <div className="border p-5">
-                    <Grid container>
-                      <Grid item xs={7}>
-                        <div className="space-y-5">
-                          {product && product?.reviews?.length !== 0 ? (
-                            product?.reviews?.map((item, i) => (
-                              <ProductReviewCard item={item} />
-                            ))
-                          ) : (
-                            <h2> No reviews yet! </h2>
-                          )}
-                        </div>
-                      </Grid>
+                {/* Progress Bars */}
+                {[
+                  { label: "Excellent", star: 5 },
+                  { label: "Very Good", star: 4 },
+                  { label: "Good", star: 3 },
+                  { label: "Average", star: 2 },
+                  { label: "Poor", star: 1 },
+                ].map((item, i) => {
+                  const count = ratingCounts[item.star];
+                  const percent =
+                    totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
-                      <Grid item xs={5}>
-                        <h1 className="text-xl font-semibold pb-1">
-                          Product Ratings
-                        </h1>
-                        <div className="flex items-center space-x-3 pb-10">
-                          <Tooltip
-                            title={`Average Rating: ${
-                              product?.avgRating  ? Number(product.avgRating?.toFixed(2)) : 0
-                            }`}
-                            placement="top-start"
-                          >
-                            <Box>
-                              <Rating
-                                name="decimal-rating"
-                                defaultValue={0}
-                                value={product?.avgRating}
-                                precision={0.5}
-                                readOnly
-                              />
-                            </Box>
-                          </Tooltip>
+                  return (
+                    <div key={i} className="flex items-center gap-3 mt-4">
+                      <p className="w-24">{item.label}</p>
 
-                          <p className="opacity-60">{reviews.length} Ratings</p>
-                        </div>
-                        <Box>
-                          <Grid
-                            container
-                            justifyContent="center"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <Grid item xs={2}>
-                              <p className="p-0">Excellent</p>
-                            </Grid>
-                            <Grid item xs={7}>
-                              <LinearProgress
-                                className=""
-                                sx={{
-                                  bgcolor: "#d0d0d0",
-                                  borderRadius: 4,
-                                  height: 7,
-                                }}
-                                variant="determinate"
-                                value={reviews.length}
-                                color="success"
-                              />
-                            </Grid>
-                            <Grid item xs={2}>
-                              <p className="opacity-50 p-2">{reviews.length}</p>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                        <Box>
-                          <Grid
-                            container
-                            justifyContent="center"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <Grid item xs={2}>
-                              <p className="p-0">Very Good</p>
-                            </Grid>
-                            <Grid item xs={7}>
-                              <LinearProgress
-                                className=""
-                                sx={{
-                                  bgcolor: "#d0d0d0",
-                                  borderRadius: 4,
-                                  height: 7,
-                                }}
-                                variant="determinate"
-                                value={0}
-                                color="success"
-                              />
-                            </Grid>
-                            <Grid item xs={2}>
-                              <p className="opacity-50 p-2">0</p>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                        <Box>
-                          <Grid
-                            container
-                            justifyContent="center"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <Grid item xs={2}>
-                              <p className="p-0">Good</p>
-                            </Grid>
-                            <Grid item xs={7}>
-                              <LinearProgress
-                                className="bg-[#885c0a]"
-                                sx={{
-                                  bgcolor: "#d0d0d0",
-                                  borderRadius: 4,
-                                  height: 7,
-                                }}
-                                variant="determinate"
-                                value={0}
-                                color="orange"
-                              />
-                            </Grid>
-                            <Grid item xs={2}>
-                              <p className="opacity-50 p-2">0</p>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                        <Box>
-                          <Grid
-                            container
-                            justifyContent="center"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <Grid item xs={2}>
-                              <p className="p-0">Avarage</p>
-                            </Grid>
-                            <Grid item xs={7}>
-                              <LinearProgress
-                                className=""
-                                sx={{
-                                  bgcolor: "#d0d0d0",
-                                  borderRadius: 4,
-                                  height: 7,
-                                  "& .MuiLinearProgress-bar": {
-                                    bgcolor: "#885c0a", // stroke color
-                                  },
-                                }}
-                                variant="determinate"
-                                value={0}
-                                color="success"
-                              />
-                            </Grid>
-                            <Grid item xs={2}>
-                              <p className="opacity-50 p-2">0</p>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                        <Box>
-                          <Grid
-                            container
-                            justifyContent="center"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <Grid item xs={2}>
-                              <p className="p-0">Poor</p>
-                            </Grid>
-                            <Grid item xs={7}>
-                              <LinearProgress
-                                className=""
-                                sx={{
-                                  bgcolor: "#d0d0d0",
-                                  borderRadius: 4,
-                                  height: 7,
-                                }}
-                                variant="determinate"
-                                value={0}
-                                color="error"
-                              />
-                            </Grid>
-                            <Grid item xs={2}>
-                              <p className="opacity-50 p-2">0</p>
-                            </Grid>
-                          </Grid>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </div>
-                </section>
-              )}
-            </Col>
-            <Col lg="12" className="mt-5">
-              <h2 className="related_title">You might also like</h2>
-            </Col>
+                      <div className="flex-1 h-2 bg-gray-200 rounded">
+                        <div
+                          className="h-2 bg-green-500 rounded transition-all"
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+
+                      <p className="text-gray-400 text-xs">
+                        {Math.round(percent)}%
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Related */}
+          <div className="mt-10">
+            <h2 className="text-xl font-semibold mb-4">You might also like</h2>
             <ProductsList data={relatedProducts} />
-          </Row>
-        </Container>
+          </div>
+        </div>
       </section>
     </Helmet>
   );

@@ -1,53 +1,52 @@
 import React from "react";
-import { Avatar } from "@mui/material";
-import { Rating, Box, Typography, Grid } from "@mui/material";
 
 const ProductReviewCard = ({ item }) => {
-  const [value, setValue] = React.useState(item.rating);
+  const rating = Math.round(item?.rating || 0);
+
   return (
-    <div className="">
-      <Grid container spacing={2} gap={3}>
-        <Grid item xs={1}>
-          <Box>
-            <Avatar
-              className="text-white"
-              sx={{ width: 56, height: 56, bgcolor: "#9155FD" }}
-              // alt={item.user.name}
-              src=""
-            >
-              {/* {item.user.name.toUpperCase()} */}
-            </Avatar>
-          </Box>
-        </Grid>
-        <Grid item xs={9}>
-          <div className="space-y-2">
-            <div className="">
-              <p className="font-semibold text-lg">{item?.user?.name}</p>
-              <p className="opacity-70">
-                {new Date(item.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-            </div>
-            <div>
-              <Rating
-                value={value}
-                // onChange={(event, newValue) => {
-                //   setValue(newValue);
-                // }}
-                name="decimal-rating"
-                defaultValue={0}
-                precision={0.5}
-                readOnly
-              />
-            </div>
-            <p>{item.review}</p>
+    <div className="bg-white border rounded-xl shadow-sm p-4 hover:shadow-md transition">
+
+      <div className="flex gap-4">
+
+        {/* AVATAR */}
+        <div className="w-12 h-12 flex items-center justify-center rounded-full bg-purple-500 text-white font-semibold text-lg">
+          {item?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+        </div>
+
+        {/* CONTENT */}
+        <div className="flex-1 space-y-2">
+
+          {/* NAME + DATE */}
+          <div>
+            <p className="font-semibold text-gray-800">
+              {item?.user?.name}
+            </p>
+            <p className="text-sm text-gray-500">
+              {new Date(item.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
           </div>
-        </Grid>
-      </Grid>
-      <div className="col-span-1 flex"></div>
+
+          {/* ⭐ RATING */}
+          <div className="flex text-yellow-400 text-lg">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <span key={star}>
+                {rating >= star ? "★" : "☆"}
+              </span>
+            ))}
+          </div>
+
+          {/* REVIEW TEXT */}
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {item?.review}
+          </p>
+
+        </div>
+      </div>
+
     </div>
   );
 };

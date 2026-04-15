@@ -1,113 +1,88 @@
-import { Box, Grid } from "@mui/material";
-import React, { useEffect, useSyncExternalStore } from "react";
+import React, { useEffect, useState } from "react";
 import OrderCard from "./OrderCard";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import { useDispatch, useSelector } from "react-redux";
 import { getOrderHistory } from "../../redux/slices/OrderSlice";
-import { breakpoints, defaultTheme } from "../../styles/themes/default";
-
-import { Container } from "../../styles/styles";
-import Breadcrumb from "../../components/common/Breadcrumb";
-import { UserContent, UserDashboardWrapper } from "../../styles/user";
-import UserMenu from "../../components/user/UserMenu";
-import styled from "styled-components";
-
-const OrderListScreenWrapper = styled.div`
-  .order-tabs-contents {
-    margin-top: 40px;
-  }
-  .order-tabs-head {
-    min-width: 170px;
-    padding: 12px 0;
-    border-bottom: 3px solid ${defaultTheme.color_whitesmoke};
-
-    &.order-tabs-head-active {
-      border-bottom-color: ${defaultTheme.color_outerspace};
-    }
-
-    @media (max-width: ${breakpoints.lg}) {
-      min-width: 120px;
-    }
-
-    @media (max-width: ${breakpoints.xs}) {
-      min-width: 80px;
-    }
-  }
-`;
 
 const orderStatus = [
-  { label: "On The Way", value: "onTheWay" },
-  { label: "Delivered", value: "delevered" },
-  { label: "Cancelled", value: "cancelled" },
-  { label: "Returned", vlue: "returned" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Placed", value: "PLACED" },
+  { label: "Confirmed", value: "CONFIRMED" },
+  { label: "Shipped", value: "SHIPPED" },
+  { label: "Delivered", value: "DELIVERED" },
+  { label: "Cancelled", value: "CANCELLED" },
 ];
 
-const breadcrumbItems = [
-  { label: "Home", link: "/" },
-  { label: "Orders", link: "/account/order" },
-];
 const Order = () => {
   const dispatch = useDispatch();
   const { orders } = useSelector((state) => state.order);
 
+  const [selectedStatus, setSelectedStatus] = useState([]);
+
   useEffect(() => {
     dispatch(getOrderHistory());
   }, []);
+
+  // ✅ Handle checkbox
+  const handleStatusChange = (value) => {
+    setSelectedStatus((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+    );
+  };
+
+  // ✅ Filter logic
+  const filteredOrders =
+    selectedStatus.length === 0
+      ? orders
+      : orders.filter((order) => selectedStatus.includes(order.orderStatus));
+
   return (
-    <OrderListScreenWrapper className="page-py-spacing">
-      <Container>
-        <Breadcrumb items={breadcrumbItems} />
-        <UserDashboardWrapper>
-          <UserMenu />
-          <UserContent>
-            <Box className="px-10">
-              <Grid
-                container
-                spacing={0}
-                sx={{ justifyContent: "space-between" }}
-              >
-                <Grid item xs={2.5} className="">
-                  <div className="h-auto shadow-lg bg-white border p-5 sticky top-5">
-                    <h1 className="font-bold text-lg">Filters</h1>
-                    <div className="space-y-4 mt-10">
-                      <h1 className="font-semibold">ORDER STATUS</h1>
-                      {orderStatus.map((option, optionIdx) => (
-                        <div key={option.value} className="flex items-center">
-                          <input
-                            //   id={`filter-${section.id}-${optionIdx}`}
-                            //   name={`${section.id}[]`}
-                            defaultValue={option.value}
-                            type="checkbox"
-                            defaultChecked={option.checked}
-                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                          />
-                          <label
-                            //   htmlFor={`filter-${section.id}-${optionIdx}`}
-                            className="ml-3 text-sm text-gray-600"
-                          >
-                            {option.label}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Grid>
-                <Grid item xs={9}>
-                  <Box className="space-y-5 ">
-                    {orders?.length > 0 &&
-                      orders.flatMap((order) =>
-                        order?.orderItems?.map((item, i) => (
-                          <OrderCard item={item} order={order} key={i} />
-                        ))
-                      )}
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          </UserContent>
-        </UserDashboardWrapper>
-      </Container>
-    </OrderListScreenWrapper>
+    <div className="bg-gray-50 min-h-screen px-4 lg:px-10 py-6">
+      {/* MAIN LAYOUT */}
+      <div className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
+        {/* 🔹 MIDDLE: FILTER */}
+        <div className="col-span-12 md:col-span-4 lg:col-span-3">
+          <div className="bg-white border rounded-xl shadow-sm p-5 sticky top-[180px]">
+            <h1 className="font-bold text-lg mb-4">Filters</h1>
+
+            <div className="space-y-4">
+              <h2 className="font-semibold text-sm text-gray-700">
+                ORDER STATUS
+              </h2>
+
+              {orderStatus.map((option) => (
+                <div key={option.value} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedStatus.includes(option.value)}
+                    onChange={() => handleStatusChange(option.value)}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                  />
+
+                  <label className="ml-3 text-sm text-gray-600">
+                    {option.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 🔹 RIGHT: ORDER LIST */}
+        <div className="col-span-12 md:col-span-8 lg:col-span-7 space-y-4">
+          {filteredOrders?.length > 0 ? (
+            filteredOrders.flatMap((order) =>
+              order?.orderItems?.map((item, i) => (
+                <OrderCard key={i} item={item} order={order} />
+              )),
+            )
+          ) : (
+            <div className="text-center text-gray-500 py-10">
+              No orders found
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
