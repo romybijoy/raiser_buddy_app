@@ -41,14 +41,18 @@ Breadcrumb.propTypes = {
 const BreadcrumbItem = ({ item, isLast }) => {
   return (
     <>
-      <Link
-        to={item.link}
-        className={`breadcrumb-item text-base ${
-          isLast ? "text-outerspace font-semibold" : "text-gray font-medium"
-        }`}
-      >
-        {item.label}
-      </Link>
+      {item.link && !isLast ? (
+        <Link
+          to={item.link}
+          className="breadcrumb-item text-base text-gray font-medium"
+        >
+          {item.label}
+        </Link>
+      ) : (
+        <span className="text-base text-outerspace font-semibold">
+          {item.label}
+        </span>
+      )}
       {!isLast && (
         <span className="breadcrumb-separator inline-flex text-xs">
           <i className="bi bi-chevron-right"></i>

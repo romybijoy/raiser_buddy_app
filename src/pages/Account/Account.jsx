@@ -1,11 +1,4 @@
 import styled from "styled-components";
-import { Container } from "../../styles/styles";
-import Breadcrumb from "../../components/common/Breadcrumb";
-import { UserContent, UserDashboardWrapper } from "../../styles/user";
-import UserMenu from "../../components/user/UserMenu";
-import Title from "../../components/common/Title";
-import { FormElement, Input } from "../../styles/form";
-import { BaseLinkGreen } from "../../styles/button";
 import { Link } from "react-router-dom";
 import { breakpoints, defaultTheme } from "../../styles/themes/default";
 import { useSelector } from "react-redux";
@@ -66,143 +59,54 @@ const AccountScreenWrapper = styled.main`
   }
 `;
 
-const breadcrumbItems = [
-  {
-    label: "Home",
-    link: "/home",
-  },
-  { label: "Account", link: "/account" },
-];
-
 const Account = () => {
   const { currentUser } = useSelector((state) => state.app);
 
   return (
-    <AccountScreenWrapper className="page-py-spacing">
-      <Container>
-        <Breadcrumb items={breadcrumbItems} />
-        <UserDashboardWrapper>
-          <UserMenu />
-          <UserContent>
-            <Title titleText={"My Account"} />
+    <div className="space-y-6">
+      <h2 className="text-xl font-semibold">My Account</h2>
 
-            <div className="wallet ">
-              <h2>Wallet Balance</h2>
-              <div className="balance">
-                <span>
-                  ₹
-                  {currentUser && currentUser?.walletBalance === null
-                    ? 0
-                    : currentUser?.walletBalance}
-                </span>
-              </div>
-            </div>
+      {/* WALLET */}
+      <div className="border rounded-lg p-5 w-64 shadow-sm">
+        <h3 className="font-medium">Wallet Balance</h3>
+        <p className="text-2xl font-semibold mt-2">
+          ₹{currentUser?.walletBalance ?? 0}
+        </p>
+      </div>
 
-            <div className="m-2 mt-4">
-              <h3 className="title-lg">Contact Details</h3>
-            </div>
-            <form>
-              <div className="form-wrapper">
-                <FormElement className="form-elem">
-                  <label
-                    htmlFor=""
-                    className="form-label font-semibold text-base"
-                  >
-                    Your Name
-                  </label>
-                  <div className="form-input-wrapper flex items-center">
-                    <Input
-                      type="text"
-                      className="form-elem-control text-outerspace font-semibold"
-                      value={currentUser && currentUser?.name}
-                      readOnly
-                    />
-                    {/* <button type="button" className="form-control-change-btn">
-                      Change
-                    </button> */}
-                  </div>
-                </FormElement>
-                <FormElement className="form-elem">
-                  <label
-                    htmlFor=""
-                    className="form-label font-semibold text-base"
-                  >
-                    Email Address
-                  </label>
-                  <div className="form-input-wrapper flex items-center">
-                    <Input
-                      type="email"
-                      className="form-elem-control text-outerspace font-semibold"
-                      value={currentUser && currentUser?.email}
-                      readOnly
-                    />
-                    {/* <button type="button" className="form-control-change-btn">
-                      Change
-                    </button> */}
-                  </div>
-                </FormElement>
-                <FormElement className="form-elem">
-                  <label
-                    htmlFor=""
-                    className="form-label font-semibold text-base"
-                  >
-                    Phone Number
-                  </label>
-                  <div className="form-input-wrapper flex items-center">
-                    <Input
-                      type="text"
-                      className="form-elem-control text-outerspace font-semibold"
-                      value={currentUser && currentUser?.mobile_number}
-                      readOnly
-                    />
-                    {/* <button type="button" className="form-control-change-btn">
-                      Change
-                    </button> */}
-                  </div>
-                </FormElement>
-                <FormElement className="form-elem">
-                  <label
-                    htmlFor=""
-                    className="form-label font-semibold text-base"
-                  >
-                    Password
-                  </label>
-                  <div className="form-input-wrapper flex items-center">
-                    <Input
-                      type="password"
-                      className="form-elem-control text-outerspace font-semibold"
-                      value="Pass Key"
-                      readOnly
-                    />
-                    {/* <button type="button" className="form-control-change-btn">
-                      Change
-                    </button> */}
-                  </div>
-                </FormElement>
-              </div>
-            </form>
-            <div>
-              <h3 className="font-weight-bold">My Contact Addresss</h3>
+      {/* CONTACT DETAILS */}
+      <div>
+        <h3 className="font-semibold mb-4">Contact Details</h3>
 
-              <div className="m-2">
-                <BaseLinkGreen to="/account/add">Add Address</BaseLinkGreen>
-              </div>
-              <div className="row">
-                {currentUser &&
-                  currentUser?.addresses.length !== 0 &&
-                  currentUser?.addresses.map((item, key) => (
-                    <div className="col-md-4 p-3" key={key}>
-                      <div className="p-3" key={key}>
-                        <AccountAddressCard address={item} />
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </UserContent>
-        </UserDashboardWrapper>
-      </Container>
-    </AccountScreenWrapper>
+        <div className="space-y-4">
+          <input className="input" value={currentUser?.name || ""} readOnly />
+          <input className="input" value={currentUser?.email || ""} readOnly />
+          <input
+            className="input"
+            value={currentUser?.mobile_number || ""}
+            readOnly
+          />
+          <input className="input" value="********" readOnly />
+        </div>
+      </div>
+
+      {/* ADDRESS */}
+      <div>
+        <h3 className="font-semibold mb-2">My Contact Address</h3>
+
+        <div className="mb-3">
+          <Link to="/account/add" className="text-blue-600">
+            Add Address
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {currentUser?.addresses?.map((item, key) => (
+            <AccountAddressCard key={key} address={item} />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

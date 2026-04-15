@@ -9,14 +9,14 @@ export const createWishlist = createAsyncThunk(
   async (data, { rejectWithValue, dispatch }) => {
     try {
       const response = await fetch(
-        `${appConfig.ip}/wishlist/${data.userId}/${data.productId}`,
+        `${appConfig.ip}/wishlist/add/${data.userId}/${data.productId}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(data),
-        }
+        },
       );
       if (!response.ok) {
         return rejectWithValue(response.status);
@@ -30,7 +30,7 @@ export const createWishlist = createAsyncThunk(
       console.log(error);
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //read action
@@ -51,7 +51,7 @@ export const showWishlist = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const deleteWishlist = createAsyncThunk(
@@ -66,15 +66,15 @@ export const deleteWishlist = createAsyncThunk(
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       const result = await response.json();
       console.log(response);
       if (response.ok) {
         dispatch(showWishlist(data.userId));
-        
-      toast.success("Product Removed from Wishlist Successfully");
+
+        toast.success("Product Removed from Wishlist Successfully");
         return fulfillWithValue(response.status);
       }
 
@@ -83,7 +83,24 @@ export const deleteWishlist = createAsyncThunk(
       console.log("first");
       return rejectWithValue(error);
     }
-  }
+  },
+);
+
+export const toggleWishlist = createAsyncThunk(
+  "wishlist/toggle",
+  async ({ userId, productId }) => {
+    await fetch(
+      `${appConfig.ip}/wishlist/toggle?userId=${userId}&productId=${productId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    return { userId, productId };
+  },
 );
 
 export const wishlistSlice = createSlice({
@@ -118,7 +135,7 @@ export const wishlistSlice = createSlice({
       .addCase(showWishlist.fulfilled, (state, action) => {
         state.loading = false;
         state.wishlist = Array.isArray(action.payload) ? action.payload : [];
-state.count = state.wishlist.length;
+        state.count = state.wishlist.length;
       })
       .addCase(showWishlist.rejected, (state, action) => {
         state.loading = false;
@@ -130,13 +147,29 @@ state.count = state.wishlist.length;
       })
       .addCase(deleteWishlist.fulfilled, (state, action) => {
         state.loading = false;
-        if(action.payload === 200){
-        state.wishlist = [];
+        if (action.payload === 200) {
+          state.wishlist = [];
         }
       })
       .addCase(deleteWishlist.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(toggleWishlist.fulfilled, (state, action) => {
+        const { productId } = action.payload;
+
+        const exists = state.wishlist.some(
+          (item) => item.productId === productId,
+        );
+
+        if (exists) {
+          state.wishlist = state.wishlist.filter(
+            (item) => item.productId !== productId,
+          );
+        } else {
+          state.wishlist.push({ productId });
+        }
+        state.count = state.wishlist.length;
       });
   },
 });

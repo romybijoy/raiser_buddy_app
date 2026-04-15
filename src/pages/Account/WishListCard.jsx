@@ -1,198 +1,121 @@
 import React from "react";
-import styled from "styled-components";
-import "../../styles/coupon.css";
-
 import { BaseLinkBlack } from "../../styles/button";
-import { breakpoints, defaultTheme } from "../../styles/themes/default";
-
 import { useDispatch, useSelector } from "react-redux";
-import { deleteWishlist } from "../../redux/slices/WishlistSlice";
-
-const WishItemWrapper = styled.div`
-  gap: 30px;
-  max-width: 900px;
-  position: relative;
-
-  @media (max-width: ${breakpoints.xl}) {
-    column-gap: 20px;
-  }
-
-  @media (max-width: ${breakpoints.lg}) {
-    column-gap: 16px;
-  }
-
-  @media (max-width: ${breakpoints.xs}) {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .wish-item-img {
-    column-gap: 30px;
-
-    @media (max-width: ${breakpoints.xl}) {
-      column-gap: 20px;
-    }
-
-    @media (max-width: ${breakpoints.lg}) {
-      column-gap: 16px;
-    }
-
-    &-wrapper {
-      min-width: 110px;
-      width: 110px;
-      border-radius: 4px;
-      overflow: hidden;
-
-      @media (max-width: ${breakpoints.xs}) {
-        min-width: 100%;
-        height: 180px;
-
-        img {
-          object-position: top;
-        }
-      }
-    }
-
-    .wish-remove-btn {
-      // width: 5px;
-      // min-width: 10px;
-      // height: 20px;
-      border: 1px solid ${defaultTheme.color_outerspace};
-      border-radius: 50%;
-      background-color: black;
-      font-size: 10px;
-      margin-top: auto;
-      margin-bottom: auto;
-
-      &:hover {
-        background-color: ${defaultTheme.color_gray};
-        color: ${defaultTheme.color_white};
-        border-color: ${defaultTheme.color_gray};
-      }
-
-      @media (max-width: ${breakpoints.sm}) {
-        position: absolute;
-        right: -10px;
-        top: -10px;
-      }
-
-      @media (max-width: ${breakpoints.xs}) {
-        right: 6px;
-        top: 6px;
-        background-color: ${defaultTheme.color_jet};
-        color: ${defaultTheme.color_white};
-      }
-    }
-  }
-
-  .wish-item-info {
-    flex: 1;
-
-    @media (max-width: ${breakpoints.sm}) {
-      flex-direction: column;
-      row-gap: 8px;
-    }
-
-    &-l {
-      row-gap: 4px;
-
-      ul {
-        row-gap: 4px;
-        li {
-          span {
-            &:last-child {
-              margin-left: 4px;
-            }
-          }
-        }
-      }
-    }
-
-    &-r {
-      column-gap: 40px;
-
-      @media (max-width: ${breakpoints.xl}) {
-        column-gap: 20px;
-      }
-
-      @media (max-width: ${breakpoints.lg}) {
-        flex-direction: column;
-        align-items: flex-end;
-        row-gap: 8px;
-      }
-
-      @media (max-width: ${breakpoints.sm}) {
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .wish-item-price {
-        @media (max-width: ${breakpoints.sm}) {
-          order: 2;
-        }
-      }
-
-      .wish-cart-btn {
-        @media (max-width: ${breakpoints.sm}) {
-          order: 1;
-        }
-      }
-    }
-  }
-`;
+import { toggleWishlist } from "../../redux/slices/WishlistSlice";
+import { addToCart } from "../../redux/slices/CartSlice";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const WishlistCard = ({ wishlist }) => {
   const dispatch = useDispatch();
+  const { currentUser } = useSelector((state) => state.app);
+  const isOutOfStock = wishlist.quantity === 0;
 
+  const navigate = useNavigate();
+
+  const handleNavigate = () => {
+    navigate(`/product/${wishlist.productId}`);
+  };
   const handleDelete = () => {
-    const data = { productId: wishlist.productId };
-    dispatch(deleteWishlist(data));
+    dispatch(
+      toggleWishlist({
+        userId: currentUser.id,
+        productId: wishlist.productId,
+      }),
+    );
+    toast.info("Removed from wishlist ❌");
+  };
+
+  const handleAddToCart = () => {
+    if (!currentUser?.id) {
+      toast.error("Please login first");
+      return;
+    }
+
+    dispatch(
+      addToCart({
+        userId: currentUser.id,
+        productId: wishlist.productId,
+      }),
+    );
+
+    toast.success("Added to cart 🛒");
+
+    // OPTIONAL: remove from wishlist
+    dispatch(
+      toggleWishlist({
+        userId: currentUser.id,
+        productId: wishlist.productId,
+      }),
+    );
   };
 
   return (
-    <WishItemWrapper className="wish-item flex" key={wishlist.productId}>
-      <div className="wish-item-img flex items-stretch">
-        <button
-          type="button"
-          className="wish-remove-btn"
-          onClick={handleDelete}
-        >
-          <i class="fa fa-times" aria-hidden="true"></i>
-        </button>
-        <div className="wish-item-img-wrapper">
-          <img src={wishlist.images[0]} className="object-fit-cover" alt="" />
-        </div>
+    <div className="flex gap-6 max-w-[900px] relative p-4 bg-white rounded-xl shadow-sm">
+      {/* IMAGE SECTION */}
+      <div
+        onClick={handleNavigate}
+        className="relative w-[110px] min-w-[110px] h-[110px] rounded overflow-hidden cursor-pointer"
+      >
+        <img
+          src={wishlist.images[0]}
+          alt=""
+          className="w-full h-full object-cover"
+        />
       </div>
-      <div className="wish-item-info flex justify-between">
-        <div className="wish-item-info-l flex flex-col">
-          <p className="wish-item-title text-xl font-bold text-outerspace">
-            {wishlist.name}
-          </p>
-          <ul className="flex flex-col">
-            <li>
-              <span className="text-lg font-bold">Category:</span>
-              <span className="text-lg text-gray font-medium capitalize">
-                {wishlist.category.name}
-              </span>
-            </li>
-            <li>
-              <span className="text-lg font-bold">Quantity:</span>
-              <span className="text-lg text-gray font-medium capitalize">
-                {wishlist.quantity}
-              </span>
-            </li>
-          </ul>
+
+      {/* INFO SECTION */}
+      <div className="flex flex-1 justify-between flex-wrap gap-4">
+        {/* LEFT */}
+        <div className="flex flex-col gap-1">
+          <p className="text-lg font-semibold text-gray-800">{wishlist.name}</p>
+
+          <div className="text-sm text-gray-500">
+            <span className="font-medium text-gray-700">Category:</span>{" "}
+            {wishlist.category.name}
+          </div>
+
+          <div className="text-sm text-gray-500">
+            <span className="font-medium text-gray-700">Quantity:</span>{" "}
+            {wishlist.quantity}
+          </div>
         </div>
-        <div className="wish-item-info-r flex items-center">
-          <span className="wish-item-price text-xl text-gray font-bold">
+
+        {/* RIGHT */}
+        <div className="flex flex-col items-end justify-between h-full">
+          {/* PRICE */}
+          <span className="text-xl font-semibold text-gray-800">
             ₹{wishlist.price}
           </span>
-          <BaseLinkBlack to="/cart" className="wish-cart-btn">
-            Add to cart
-          </BaseLinkBlack>
+
+          {/* ACTIONS */}
+          <div className="flex flex-col items-end gap-2 mt-4">
+            {/* ADD TO CART */}
+            <button
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              className={`px-4 py-1.5 rounded-lg text-sm text-white transition
+      ${
+        isOutOfStock
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-green-600 hover:bg-green-700"
+      }`}
+            >
+              {isOutOfStock ? "Out of Stock" : "Add to cart"}
+            </button>
+
+            {/* REMOVE */}
+            <button
+              onClick={handleDelete}
+              className="text-xs text-gray-400 hover:text-red-500 transition"
+            >
+              Remove
+            </button>
+          </div>
         </div>
       </div>
-    </WishItemWrapper>
+    </div>
   );
 };
+
 export default WishlistCard;

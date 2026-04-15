@@ -141,9 +141,9 @@ const UserMenu = () => {
 
           <li className="nav-menu-item">
             <Link
-              to="/wishlist"
+              to="/account/wishlist"
               className={`nav-menu-link flex items-center ${
-                window.location.pathname === "/wishlist" ? "active" : ""
+                window.location.pathname === "/account/wishlist" ? "active" : ""
               }`}
             >
               <span className="nav-link-icon flex items-center justify-center">
@@ -157,9 +157,9 @@ const UserMenu = () => {
 
           <li className="nav-menu-item">
             <Link
-              to="/coupons"
+              to="/account/coupons"
               className={`nav-menu-link flex items-center ${
-                window.location.pathname === "/coupons" ? "active" : ""
+                window.location.pathname === "/account/coupons" ? "active" : ""
               }`}
             >
               <span className="nav-link-icon flex items-center justify-center">

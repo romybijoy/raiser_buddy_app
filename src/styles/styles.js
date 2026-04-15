@@ -3,9 +3,6 @@ import { breakpoints, defaultTheme } from "./themes/default";
 
 // common styles components
 
-export const PageWrapper = styled.div`
-  overflow: hidden !important;
-`;
 
 export const Container = styled.div`
   max-width: 1600px;

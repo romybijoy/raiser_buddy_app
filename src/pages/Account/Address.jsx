@@ -1,27 +1,17 @@
 import * as React from "react";
 import { Grid, TextField, Button, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { createAddress } from "../../redux/slices/OrderSlice";
-import userEvent from "@testing-library/user-event";
-import AddressCard from "../../components/address/AdreessCard";
-import { useState } from "react";
 import { toast } from "react-toastify";
-import { Container } from "../../styles/styles";
-import Breadcrumb from "../../components/common/Breadcrumb";
-import { UserContent, UserDashboardWrapper } from "../../styles/user";
-import UserMenu from "../../components/user/UserMenu";
-
 
 export default function AddAddressForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [selectedAddress, setSelectedAdress] = useState(null);
 
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    // eslint-disable-next-line no-console
 
     const address = {
       house_name: data.get("house_name"),
@@ -35,137 +25,68 @@ export default function AddAddressForm() {
     };
 
     dispatch(createAddress({ address }));
-
     navigate("/account");
     toast.success("Address added successfully");
   };
 
-  const breadcrumbItems = [
-    { label: "Home", link: "/" },
-    { label: "Orders", link: "/account/add" },
-  ];
-
   return (
-    <Container>
-      <Breadcrumb items={breadcrumbItems} />
-      <UserDashboardWrapper>
-        <UserMenu />
-        <UserContent>
-          <Grid container spacing={4}>
-            <Grid item xs={12} lg={12}>
-              <Box className="border rounded-md shadow-md p-5">
-                <form onSubmit={handleSubmit}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="house_name"
-                        name="house_name"
-                        label="House Name / House No."
-                        fullWidth
-                        autoComplete="given-name"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="place"
-                        name="place"
-                        label="Place"
-                        fullWidth
-                        autoComplete="given-name"
-                      />
-                    </Grid>
-                    {/* <Grid item xs={12}>
-                <TextField
-                  required
-                  id="address"
-                  name="address"
-                  label="Address"
-                  fullWidth
-                  autoComplete="shipping address"
-                  multiline
-                  rows={4}
-                />
-              </Grid> */}
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="city"
-                        name="city"
-                        label="City"
-                        fullWidth
-                        autoComplete="shipping address-level2"
-                      />
-                    </Grid>
+    <div className="w-full max-w-3xl mx-auto">
+      
+      {/* CARD */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <h2 className="text-xl font-semibold mb-6 text-gray-800">
+          Add Address
+        </h2>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="district"
-                        name="district"
-                        label="District"
-                        fullWidth
-                      />
-                    </Grid>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={3}>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="state"
-                        name="state"
-                        label="State/Province/Region"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="zip"
-                        name="zip"
-                        label="Zip / Postal code"
-                        fullWidth
-                        autoComplete="shipping postal-code"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="country"
-                        name="country"
-                        label="Country"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        required
-                        id="phoneNumber"
-                        name="phoneNumber"
-                        label="Phone Number"
-                        fullWidth
-                        autoComplete="tel"
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Button
-                        sx={{ padding: ".9rem 1.5rem" }}
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                      >
-                        Submit
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </form>
-              </Box>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="house_name" label="House Name" />
             </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="place" label="Place" />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="city" label="City" />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="district" label="District" />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="state" label="State" />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="zip" label="Zip Code" />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="country" label="Country" />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth required name="phoneNumber" label="Phone Number" />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Button
+                fullWidth
+                size="large"
+                type="submit"
+                variant="contained"
+              >
+                Save Address
+              </Button>
+            </Grid>
+
           </Grid>
-        </UserContent>
-      </UserDashboardWrapper>
-    </Container>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -32,13 +32,18 @@ const Layout = () => {
   }, [currentUser, dispatch]);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
+
       <ToastContainer />
 
-      <Routers />
+      {/* MAIN CONTENT */}
+      <div className="flex-grow">
+        <Routers />
+      </div>
+
       <Footer />
-    </>
+    </div>
   );
 };
 

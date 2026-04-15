@@ -1,38 +1,32 @@
-import * as React from "react";
-import { Grid, TextField, Button, Box } from "@mui/material";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { createOrder } from "../../redux/slices/OrderSlice";
-import userEvent from "@testing-library/user-event";
 import AddressCard from "../../components/address/AdreessCard";
-import { useState } from "react";
 
 export default function AddDeliveryAddressForm({ handleNext }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [selectedAddress, setSelectedAdress] = useState(null);
   const { currentUser } = useSelector((state) => state.app);
 
-  // console.log("auth", auth);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    // eslint-disable-next-line no-console
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
 
     const address = {
-      house_name: data.get("house_name"),
-      place: data.get("place"),
-      country: data.get("country"),
-      district: data.get("district"),
-      city: data.get("city"),
-      state: data.get("state"),
-      zipcode: data.get("zip"),
-      mobile: data.get("phoneNumber"),
+      house_name: form.get("house_name"),
+      place: form.get("place"),
+      country: form.get("country"),
+      district: form.get("district"),
+      city: form.get("city"),
+      state: form.get("state"),
+      zipcode: form.get("zip"),
+      mobile: form.get("phoneNumber"),
     };
 
     dispatch(createOrder({ address, navigate }));
-    // after perfoming all the opration
     handleNext();
   };
 
@@ -42,144 +36,75 @@ export default function AddDeliveryAddressForm({ handleNext }) {
   };
 
   return (
-    <Grid container spacing={4}>
-      <Grid item xs={12} lg={5}>
-        <Box className="border rounded-md shadow-md h-[30.5rem] overflow-y-scroll ">
-          {currentUser && currentUser?.addresses.length !== 0 &&
-            currentUser?.addresses.map((item, key) => (
+    <div className="bg-gray-50 min-h-screen p-4 lg:p-10">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {/* LEFT: SAVED ADDRESSES */}
+        <div className="bg-white rounded-xl shadow-sm border p-4 h-[32rem] overflow-y-auto">
+          <h2 className="font-semibold text-lg mb-3">Saved Addresses</h2>
+
+          {currentUser?.addresses?.length > 0 ? (
+            currentUser.addresses.map((item, key) => (
               <div
-              key={key}
-                onClick={() => setSelectedAdress(item)}
-                className="p-5 py-7 border-b cursor-pointer"
+                key={key}
+                onClick={() => setSelectedAddress(item)}
+                className={`p-4 border rounded-lg mb-3 cursor-pointer transition 
+                  ${
+                    selectedAddress?.add_id === item.add_id
+                      ? "border-blue-500 bg-blue-50"
+                      : "hover:border-gray-400"
+                  }`}
               >
-                {" "}
                 <AddressCard address={item} />
+
                 {selectedAddress?.add_id === item.add_id && (
-                  <Button
-                    sx={{ mt: 2 }}
-                    size="large"
-                    variant="contained"
-                    color="primary"
-                    onClick={()=>handleCreateOrder(item)}
+                  <button
+                    onClick={() => handleCreateOrder(item)}
+                    className="mt-3 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
                   >
-                    Deliverd Here
-                  </Button>
+                    Deliver Here
+                  </button>
                 )}
               </div>
-            ))}
-        </Box>
-      </Grid>
-      <Grid item xs={12} lg={7}>
-        <Box className="border rounded-md shadow-md p-5">
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="house_name"
-                  name="house_name"
-                  label="House Name / House No."
-                  fullWidth
-                  autoComplete="given-name"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="place"
-                  name="place"
-                  label="Place"
-                  fullWidth
-                  autoComplete="given-name"
-                />
-              </Grid>
-              {/* <Grid item xs={12}>
-                <TextField
-                  required
-                  id="address"
-                  name="address"
-                  label="Address"
-                  fullWidth
-                  autoComplete="shipping address"
-                  multiline
-                  rows={4}
-                />
-              </Grid> */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="city"
-                  name="city"
-                  label="City"
-                  fullWidth
-                  autoComplete="shipping address-level2"
-                />
-              </Grid>
+            ))
+          ) : (
+            <p className="text-gray-500">No saved addresses</p>
+          )}
+        </div>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="district"
-                  name="district"
-                  label="District"
-                  fullWidth
-                />
-              </Grid>
+        {/* RIGHT: NEW ADDRESS FORM */}
+        <div className="bg-white rounded-xl shadow-sm border p-6">
+          <h2 className="font-semibold text-lg mb-4">
+            Add New Address
+          </h2>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="state"
-                  name="state"
-                  label="State/Province/Region"
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="zip"
-                  name="zip"
-                  label="Zip / Postal code"
-                  fullWidth
-                  autoComplete="shipping postal-code"
-                />
-              </Grid>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="country"
-                  name="country"
-                  label="Country"
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  label="Phone Number"
-                  fullWidth
-                  autoComplete="tel"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  sx={{ padding: ".9rem 1.5rem" }}
-                  size="large"
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                >
-                  Deliverd Here
-                </Button>
-              </Grid>
-            </Grid>
+            <input name="house_name" placeholder="House Name / No." required className="input" />
+            <input name="place" placeholder="Place" required className="input" />
+
+            <input name="city" placeholder="City" required className="input" />
+            <input name="district" placeholder="District" required className="input" />
+
+            <input name="state" placeholder="State" required className="input" />
+            <input name="zip" placeholder="Zip Code" required className="input" />
+
+            <input name="country" placeholder="Country" required className="input" />
+            <input name="phoneNumber" placeholder="Phone Number" required className="input" />
+
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                className="w-full bg-green-500 text-white py-3 rounded-lg font-medium hover:bg-green-600"
+              >
+                Deliver Here
+              </button>
+            </div>
+
           </form>
-        </Box>
-      </Grid>
-    </Grid>
+        </div>
+
+      </div>
+    </div>
   );
 }
