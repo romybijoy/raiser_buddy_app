@@ -1,23 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Form, Button, Row, Col, Alert } from "react-bootstrap";
-import FormContainer from "../../components/Form/FormContainer";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useLoginMutation } from "../../redux/slices/UsersApiSlice";
 import { setCredentials } from "../../redux/slices/AuthSlice";
 import { toast } from "react-toastify";
-import Loader from "../../components/Loader/Loader";
 import {
   FacebookLoginButton,
   GoogleLoginButton,
 } from "react-social-login-buttons";
-
 import { UserAuth } from "../../context/AuthContext";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [validated, setValidated] = useState(false);
   const [error, setError] = useState("");
 
   const dispatch = useDispatch();
@@ -25,135 +20,138 @@ const LoginScreen = () => {
 
   const [login, { isLoading }] = useLoginMutation();
 
-  const { userInfo } = useSelector((state) => state.auth);
-  const role = localStorage.getItem("role");
+  const { googleSignIn, facebookSignIn } = UserAuth();
 
-  const { googleSignIn, dbUserSignIn, user, facebookSignIn } = UserAuth();
-
-  useEffect(() => {
-    console.log(user);
-    // if (user) {
-    //   console.log(user);
-    //   navigate("/home");
-    // }
-  }, [navigate, user]);
-
+  // 🔥 Submit
   const submitHandler = async (e) => {
     e.preventDefault();
-    const form = e.currentTarget;
 
-    if (form.checkValidity() === false) {
-      e.preventDefault();
-      e.stopPropagation();
-      setValidated(true);
+    if (!email || !password) {
+      toast.error("Please fill all fields");
+      return;
     }
-    {
-      try {
-        const res = await login({ email, password }).unwrap();
-        dispatch(setCredentials({ ...res }));
-        if (role === "ADMIN") {
-          setError("Invalid user credentials.");
-          return;
-        }
-        if (role === "USER") {
-          // dbUserSignIn();
-          navigate("/home");
-          toast.success("Login successfully");
-        }
-      } catch (err) {
-        setError(err?.data?.message || err.error);
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      toast.error("Enter valid email");
+      return;
+    }
+
+    if (password.length < 4) {
+      toast.error("Password must be at least 4 characters");
+      return;
+    }
+
+    try {
+      const res = await login({ email, password }).unwrap();
+
+      dispatch(setCredentials(res));
+
+      // 🔥 Use role from response
+      if (res.role === "ADMIN") {
+        toast.error("Invalid user credentials");
+        return;
       }
+
+      toast.success("Login successfully");
+      navigate("/home");
+    } catch (err) {
+      toast.error(err?.data?.message || "Login failed");
     }
   };
 
+  // 🔥 Google Login
   const handleGoogleSignIn = async () => {
     try {
       await googleSignIn();
       navigate("/home");
     } catch (error) {
-      console.log(error);
+      toast.error("Google login failed");
     }
   };
 
+  // 🔥 Facebook Login
   const handleFacebookSignIn = async () => {
     try {
       await facebookSignIn();
       navigate("/home");
     } catch (error) {
-      console.log(error);
+      toast.error("Facebook login failed");
     }
   };
 
   return (
-    <FormContainer>
-      <h1>Sign In</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center mb-6">Sign In</h2>
 
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Form noValidate validated={validated} onSubmit={submitHandler}>
-        <Form.Group className="my-2" controlId="email">
-          <Form.Label>Email Address</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            isInvalid={validated && !/^\S+@\S+\.\S+$/.test(email)}
-          ></Form.Control>
-          <Form.Control.Feedback type="invalid">
-            Please enter a valid email address.
-          </Form.Control.Feedback>
-        </Form.Group>
+        {/* Error */}
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 mb-4 rounded">
+            {error}
+          </div>
+        )}
 
-        <Form.Group className="my-2" controlId="password">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            isInvalid={validated && password.length < 4}
-          ></Form.Control>
-          <Form.Control.Feedback type="invalid">
-            Password must be at least 4 characters long.
-          </Form.Control.Feedback>
-        </Form.Group>
+        {/* Form */}
+        <form onSubmit={submitHandler}>
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
 
-        <Row className="py-3">
-          <Col>
-            <Button
-              disabled={isLoading}
-              type="submit"
-              variant="primary"
-              className="mt-3"
-            >
-              Sign In
-            </Button>
-          </Col>
+          {/* Password */}
+          <div className="mb-2">
+            <label className="block mb-1 font-medium">Password</label>
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
 
-          <Col className="p-4">
-            <Link to="/forgotPassword">Forgot Password</Link>
-          </Col>
-        </Row>
-      </Form>
+          {/* Forgot */}
+          <div className="text-right mb-4">
+            <Link to="/forgotPassword" className="text-blue-500 text-sm">
+              Forgot Password?
+            </Link>
+          </div>
 
-      {isLoading && <Loader />}
+          {/* Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          >
+            {isLoading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
 
-      <Row className="py-3">
-        <Col>
-          New Customer? <Link to="/signup">Register</Link>
-        </Col>
-      </Row>
+        {/* Register */}
+        <div className="mt-4 text-center text-sm">
+          New Customer?{" "}
+          <Link to="/signup" className="text-blue-500">
+            Register
+          </Link>
+        </div>
 
-      <Row className="py-3 px-5">
-        <GoogleLoginButton onClick={handleGoogleSignIn} />
-      </Row>
+        {/* Divider */}
+        <div className="my-4 text-center text-gray-500">OR</div>
 
-      <Row className="py-3 px-5">
-        <FacebookLoginButton onClick={handleFacebookSignIn} />
-      </Row>
-    </FormContainer>
+        {/* Social Login */}
+        <div className="space-y-3">
+          <GoogleLoginButton onClick={handleGoogleSignIn} />
+          <FacebookLoginButton onClick={handleFacebookSignIn} />
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,79 +1,72 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Button } from "react-bootstrap";
-import FormContainer from "../../components/Form/FormContainer";
-import { useDispatch, useSelector } from "react-redux";
-import { useLoginMutation } from "../../redux/slices/UsersApiSlice";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { forgotPassword } from "../../redux/slices/UserSlice";
 
-import "../../styles/verifyOtp.css";
-
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [login, { isLoading }] = useLoginMutation();
-
-  const { user, error, loading, message } = useSelector((state) => state.app)
-
-  useEffect(() => {
-    
-  }, []);
-
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (!email) {
+      toast.error("Please enter email");
+      return;
+    }
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      toast.error("Enter valid email");
+      return;
+    }
+
     try {
-      dispatch(forgotPassword({ email: email }));
-      navigate("/forgotPassword");
+      await dispatch(forgotPassword({ email })).unwrap();
+
+      toast.success("OTP sent to your email");
+
+      // Navigate to OTP page (better UX)
+      navigate("/verifyotp");
+
     } catch (err) {
-      toast.error(err?.data?.message || err.error);
-      navigate("/forgotPassword");
+      toast.error(err || "Something went wrong");
     }
   };
 
- 
-
   return (
-    <FormContainer>
-      <h1>Forgot Password</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
 
-      <Form>
-        <Form.Group className="my-2" controlId="email">
-          <Form.Control
-            type="email"
-            placeholder="Enter Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Forgot Password
+        </h2>
 
-        {/* <div className="countdown-text">
-          
+        <form onSubmit={submitHandler}>
 
-          {/* Button to resend OTP */}
-          {/* <Button
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
 
-            style={{
-              color: "#FF5630",
-            }}
-            onClick={resendOTP}
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
           >
-            Resend OTP
-          </Button> */}
-        {/* </div> */}
-
-        {/* Button to submit email */}
-        <Button className="submit-btn" onClick={submitHandler}>SUBMIT</Button>
-      </Form>
-
-
-      <div>
-        { loading ? (<p> Loading </p>):<p>{message}</p>}
+            Submit
+          </button>
+        </form>
       </div>
-    </FormContainer>
+    </div>
   );
 };
 

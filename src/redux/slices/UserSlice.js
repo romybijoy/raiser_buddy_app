@@ -28,7 +28,7 @@ export const createUser = createAsyncThunk(
       console.log(error.response.data);
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //read action
@@ -45,7 +45,7 @@ export const showUser = createAsyncThunk(
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         ))
       : (response = await fetch(
           `${appConfig.ip}/admin/get-all-users?keyword=&role=`,
@@ -54,7 +54,7 @@ export const showUser = createAsyncThunk(
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         ));
 
     try {
@@ -64,7 +64,7 @@ export const showUser = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 //delete action
 export const deleteUser = createAsyncThunk(
@@ -85,7 +85,7 @@ export const deleteUser = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //update action
@@ -108,7 +108,7 @@ export const updateUser = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //update action
@@ -130,7 +130,7 @@ export const fetchUserById = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const getProf = createAsyncThunk(
@@ -151,31 +151,35 @@ export const getProf = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //verify OTP action
 export const verifyOTP = createAsyncThunk(
   "verifyOTP",
   async (data, { rejectWithValue }) => {
-    console.log("otp data", data);
-    const response = await fetch(
-      `${appConfig.ip}/auth/verify-account?email=${data.email}&otp=${data.otp}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
     try {
+      const response = await fetch(
+        `${appConfig.ip}/auth/verify-account?email=${data.email}&otp=${data.otp}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
       const result = await response.json();
+
+      if (!response.ok) {
+        return rejectWithValue(result?.message || "OTP verification failed");
+      }
+
       return result;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message || "Something went wrong");
     }
-  }
+  },
 );
 
 //regenerate OTP action
@@ -190,7 +194,7 @@ export const regenerateOTP = createAsyncThunk(
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     try {
@@ -199,7 +203,7 @@ export const regenerateOTP = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //forgot-password action
@@ -215,7 +219,7 @@ export const forgotPassword = createAsyncThunk(
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const result = await response.json();
@@ -224,7 +228,7 @@ export const forgotPassword = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //set-password action
@@ -240,7 +244,7 @@ export const resetPassword = createAsyncThunk(
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       const result = await response.json();
@@ -248,7 +252,7 @@ export const resetPassword = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const userDetail = createSlice({
@@ -315,7 +319,7 @@ export const userDetail = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.loading = false;
         state.users = state.users.map((ele) =>
-          ele.id === action.payload.id ? action.payload : ele
+          ele.id === action.payload.id ? action.payload : ele,
         );
       })
       .addCase(updateUser.rejected, (state, action) => {
@@ -328,8 +332,8 @@ export const userDetail = createSlice({
       .addCase(getProf.fulfilled, (state, action) => {
         state.loading = false;
         state.currentUser = action.payload.ourUsers;
-        if(action.payload.ourUsers){
-        localStorage.setItem("id", action.payload.ourUsers?.id);
+        if (action.payload.ourUsers) {
+          localStorage.setItem("id", action.payload.ourUsers?.id);
         }
       })
       .addCase(getProf.rejected, (state, action) => {
@@ -341,6 +345,7 @@ export const userDetail = createSlice({
       })
       .addCase(verifyOTP.fulfilled, (state, action) => {
         state.loading = false;
+        state.message = action.payload.message;
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.loading = false;

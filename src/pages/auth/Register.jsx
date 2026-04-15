@@ -1,14 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createUser } from "../../redux/slices/UserSlice";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Firebase } from "../../firebase/config";
-import FormContainer from "../../components/Form/FormContainer";
-import { Alert, Button, Form, Image } from "react-bootstrap";
-import Loader from "../../components/Loader/Loader";
-
 import { toast } from "react-toastify";
-import { useRef } from "react";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -19,206 +14,177 @@ const Register = () => {
     role: "USER",
     image: "",
   });
+
   const [image, setImage] = useState("");
   const [validated, setValidated] = useState(false);
   const [valError, setValError] = useState("");
 
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
   const inputRef = useRef();
-  const { user, message, error, loading } = useSelector((state) => state.app);
 
+  const { message, error, loading } = useSelector((state) => state.app);
+
+  // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handle image upload (Firebase)
   const handleImageChange = (e) => {
-    console.log(e.target.files[0]);
+    const file = e.target.files[0];
+    if (!file) return;
+
     Firebase.storage()
-      .ref(`/image/${e.target.files[0].name}`)
-      .put(e.target.files[0])
+      .ref(`/image/${file.name}`)
+      .put(file)
       .then(({ ref }) => {
         ref.getDownloadURL().then((url) => {
           setImage(url);
-          console.log(e.target.name, url);
-          setFormData({ ...formData, [e.target.name]: url });
+          setFormData({ ...formData, image: url });
         });
       });
   };
 
-  const handleSubmit = async (e) => {
-    const form = e.currentTarget;
+  // Submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    if (form.checkValidity() === false) {
-      e.preventDefault();
-      e.stopPropagation();
+    if (
+      !formData.name ||
+      !formData.email ||
+      formData.password.length < 4 ||
+      !formData.mobile_number ||
+      !image
+    ) {
       setValidated(true);
-    } else {
-      try {
-        e.preventDefault();
-        console.log(formData);
-
-        dispatch(createUser(formData));
-        // Clear the form fields after successful registration
-        setFormData({
-          name: "",
-          email: "",
-          password: "",
-          mobile_number: "",
-          image: "",
-        });
-
-        if (error === Number(409)) {
-          setValError("User with email already exists !!!");
-        } else if (!Object.is(message, null)) {
-          toast.success("User registered successfully, verify otp");
-          navigate("/verifyotp");
-        } else {
-          setValError("Something went wrong");
-        }
-      } catch (err) {
-        setValError(err);
-      }
+      return;
     }
+
+    dispatch(createUser(formData));
   };
 
+  // Handle response
+  useEffect(() => {
+    if (error === 409) {
+      setValError("User with email already exists");
+    } else if (message) {
+      toast.success("User registered successfully, please verify OTP");
+      navigate("/verifyotp");
+    }
+  }, [error, message]);
+
   return (
-    <FormContainer className="p-3">
-      <h1>Registration</h1>
-      <br />
-      {valError && <Alert variant="danger">{valError}</Alert>}
-      <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="my-2" controlId="name">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="text"
-            name="name"
-            placeholder="Enter name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-          ></Form.Control>
-          <Form.Control.Feedback type="invalid">
-            Please enter a name.
-          </Form.Control.Feedback>
-        </Form.Group>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center mb-6">Registration</h2>
 
-        <Form.Group className="my-2" controlId="email">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            placeholder="Enter email"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-            isInvalid={validated && !/^\S+@\S+\.\S+$/.test(formData.email)}
-          ></Form.Control>
-          <Form.Control.Feedback type="invalid">
-            Please enter a valid email address.
-          </Form.Control.Feedback>
-        </Form.Group>
+        {valError && (
+          <div className="bg-red-100 text-red-700 p-2 mb-4 rounded">
+            {valError}
+          </div>
+        )}
 
-        <Form.Group className="my-2" controlId="password">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            placeholder="Enter password"
-            value={formData.password}
-            onChange={handleInputChange}
-            required
-            isInvalid={validated && formData.password.length < 4}
-          ></Form.Control>
-          <Form.Control.Feedback type="invalid">
-            Please enter a password.
-          </Form.Control.Feedback>
-        </Form.Group>
+        <form onSubmit={handleSubmit}>
+          {/* Name */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+            />
+            {validated && !formData.name && (
+              <p className="text-red-500 text-sm">Please enter a name</p>
+            )}
+          </div>
 
-        <Form.Group className="my-2" controlId="city">
-          <Form.Label>Mobile Number</Form.Label>
-          <Form.Control
-            type="text"
-            name="mobile_number"
-            placeholder="Enter Mobile number"
-            value={formData.mobile_number}
-            onChange={handleInputChange}
-            required
-          ></Form.Control>
-          <Form.Control.Feedback type="invalid">
-            Please enter a mobile number.
-          </Form.Control.Feedback>
-        </Form.Group>
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+            />
+            {validated && !/^\S+@\S+\.\S+$/.test(formData.email) && (
+              <p className="text-red-500 text-sm">Enter valid email</p>
+            )}
+          </div>
 
-        {/* <Form.Group className="my-2" controlId="role">
-          <Form.Label>Role</Form.Label>
-          <Form.Select
-            aria-label="Role"
-            name="role"
-            // value={formData.role}
-            onChange={handleInputChange}
+          {/* Password */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter password"
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+            />
+            {validated && formData.password.length < 4 && (
+              <p className="text-red-500 text-sm">
+                Password must be at least 4 characters
+              </p>
+            )}
+          </div>
+
+          {/* Mobile */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Mobile Number</label>
+            <input
+              type="text"
+              name="mobile_number"
+              placeholder="Enter mobile number"
+              value={formData.mobile_number}
+              onChange={handleInputChange}
+              className="w-full p-2 border rounded"
+            />
+            {validated && !formData.mobile_number && (
+              <p className="text-red-500 text-sm">Enter mobile number</p>
+            )}
+          </div>
+
+          {/* Image Upload */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Profile Image</label>
+            <input
+              type="file"
+              ref={inputRef}
+              onChange={handleImageChange}
+              className="w-full"
+            />
+            {validated && !image && (
+              <p className="text-red-500 text-sm">Upload an image</p>
+            )}
+
+            {image && (
+              <img
+                src={image}
+                alt="preview"
+                className="mt-2 w-16 h-16 rounded"
+              />
+            )}
+          </div>
+
+          {/* Button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
           >
-            <option>Select..</option>
-            <option value="ADMIN">Admin</option>
-            <option value="USER">User</option>
-          </Form.Select>
-        </Form.Group> */}
-
-        <Form.Group className="my-2" controlId="image">
-          <Form.Label>Profile Image</Form.Label>
-          <br />
-          {/* <Image
-            alt=""
-            width="200px"
-            height="200px"
-            src={
-              image ? (
-                formData.image === "" ? (
-                  <p>Loading...</p>
-                ) : (
-                  URL.createObjectURL(image)
-                )
-              ) : (
-                ""
-              )
-            } 
-          ></Image> */}
-
-          <br />
-          {/* <input type="file" name="image" onChange={handleImageChange} /> */}
-          <Form.Control
-            type="file"
-            // accept="image/*"
-            multiple
-            ref={inputRef}
-            name="image"
-            required
-            isInvalid={validated && image === ""}
-            onChange={handleImageChange}
-            // style={{ display: 'none' }}
-          ></Form.Control>
-          <Form.Control.Feedback type="invalid">
-            Please upload an image.
-          </Form.Control.Feedback>
-
-          <br />
-          {image && (
-            <div>
-              <div>
-                <img src={image} width="50px" height="50px" />
-              </div>
-            </div>
-          )}
-        </Form.Group>
-
-        <Button type="submit" variant="primary" className="mt-3">
-          Submit
-        </Button>
-      </Form>
-    </FormContainer>
+            {loading ? "Loading..." : "Register"}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 

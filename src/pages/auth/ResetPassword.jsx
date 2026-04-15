@@ -1,94 +1,88 @@
-import { useState, useEffect } from "react";
-import { useNavigate,useLocation } from "react-router-dom";
-import { Form, Button } from "react-bootstrap";
-import FormContainer from "../../components/Form/FormContainer";
-import { useDispatch, useSelector } from "react-redux";
-import { useLoginMutation } from "../../redux/slices/UsersApiSlice";
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { resetPassword } from "../../redux/slices/UserSlice";
 
-import "../../styles/verifyOtp.css";
-
 const ResetPassword = () => {
+  const query = new URLSearchParams(useLocation().search);
+  const email = query.get("email");
 
-  const useQuery = () => new URLSearchParams(useLocation().search);
-
-  const query = useQuery();
-  const email  = query.get("email");
-
-  console.log(email)
-  // const [emailId, setEmail] = useState(email);
   const [newPassword, setNewPassword] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [login, { isLoading }] = useLoginMutation();
-
-  const { user, error, loading } = useSelector((state) => state.app);
-
-
-
-  useEffect(() => {
-
-   
-  }, []);
-
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (!newPassword) {
+      toast.error("Please enter new password");
+      return;
+    }
+
+    if (newPassword.length < 4) {
+      toast.error("Password must be at least 4 characters");
+      return;
+    }
+
     try {
-      dispatch(resetPassword({ email: email, newPassword: newPassword }));
+      await dispatch(
+        resetPassword({ email, newPassword })
+      ).unwrap();
+
+      toast.success("Password reset successfully");
+
       navigate("/login");
+
     } catch (err) {
-      toast.error(err?.data?.message || err.error);
-      navigate("/verifyotp");
+      toast.error(err || "Reset failed");
     }
   };
 
   return (
-    <FormContainer>
-      <h1>Reset Password</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
 
-      <Form>
-        <Form.Group className="my-2" controlId="email">
-          <Form.Control
-            type="email"
-            placeholder= {email}
-            value={email}
-            // onChange={(e) => setEmail(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Reset Password
+        </h2>
 
-        <Form.Group className="my-2" controlId="newPassword">
-          <Form.Control
-            type="password"
-            placeholder="Enter New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
+        <form onSubmit={submitHandler}>
 
-        {/* <div className="countdown-text">
-         
+          {/* Email (Read-only) */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              value={email || ""}
+              readOnly
+              className="w-full p-2 border rounded bg-gray-100"
+            />
+          </div>
 
-          {/* Button to resend OTP */}
-        {/* <Button
+          {/* New Password */}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">New Password</label>
+            <input
+              type="password"
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full p-2 border rounded"
+            />
+          </div>
 
-            style={{
-              color: "#FF5630",
-            }}
-            onClick={resendOTP}
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
           >
-            Resend OTP
-          </Button>
-        </div>  */}
-
-        {/* Button to submit OTP */}
-        <Button className="submit-btn" onClick={submitHandler}>
-          SUBMIT
-        </Button>
-      </Form>
-    </FormContainer>
+            Reset Password
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 

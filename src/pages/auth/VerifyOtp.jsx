@@ -1,13 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Button } from "react-bootstrap";
-import FormContainer from "../../components/Form/FormContainer";
 import { useDispatch, useSelector } from "react-redux";
-import { useLoginMutation } from "../../redux/slices/UsersApiSlice";
 import { toast } from "react-toastify";
 import { verifyOTP, regenerateOTP } from "../../redux/slices/UserSlice";
-
-import "../../styles/verifyOtp.css";
 
 const OtpVerification = () => {
   const [otp, setOtp] = useState("");
@@ -17,97 +12,110 @@ const OtpVerification = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // const [login, { isLoading }] = useLoginMutation();
+  const { user, error, loading, message } = useSelector((state) => state.app);
 
-  // const { userInfo } = useSelector((state) => state.auth);
-
-  const { user, error, loading } = useSelector((state) => state.app)
-
+  // Timer logic (fixed dependency issue)
   useEffect(() => {
     const interval = setInterval(() => {
-      if (seconds > 0) {
-        setSeconds(seconds - 1);
-      }
+      setSeconds((prev) => {
+        if (prev > 0) return prev - 1;
 
-      if (seconds === 0) {
-        if (minutes === 0) {
-          clearInterval(interval);
-        } else {
-          setSeconds(59);
-          setMinutes(minutes - 1);
+        if (minutes > 0) {
+          setMinutes((m) => m - 1);
+          return 59;
         }
-      }
+
+        return 0;
+      });
     }, 1000);
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [seconds]);
+    return () => clearInterval(interval);
+  }, [minutes]);
 
+  
+
+  // Submit OTP
   const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      dispatch(verifyOTP({ email: user.email, otp: otp }));
-      navigate("/login");
-    } catch (err) {
-      toast.error(err?.data?.message || err.error);
-      navigate("/verifyotp");
-    }
-  };
+  e.preventDefault();
 
+  if (!otp) {
+    toast.error("Please enter OTP");
+    return;
+  }
+
+  try {
+    await dispatch(
+      verifyOTP({ email: user?.email, otp })
+    ).unwrap();
+
+    // Only runs if success
+    toast.success("OTP verified successfully");
+    navigate("/login");
+
+  } catch (err) {
+    // Runs if API fails
+    toast.error(err || "Invalid OTP");
+  }
+};
+  // Resend OTP
   const resendOTP = () => {
     setMinutes(1);
-    setSeconds(60);
+    setSeconds(30);
 
-    dispatch(regenerateOTP({email : user.email}))
+    dispatch(regenerateOTP({ email: user?.email }));
   };
 
   return (
-    <FormContainer>
-      <h1>Verify OTP</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md text-center">
+        <h2 className="text-2xl font-bold mb-4">Verify OTP</h2>
 
-      <Form>
-        <Form.Group className="my-2" controlId="otp">
-          <Form.Control
-            type="otp"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
+        {/* OTP Input */}
+        <input
+          type="text"
+          placeholder="Enter OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          className="w-full p-2 border rounded mb-4 text-center text-lg tracking-widest"
+        />
 
-        <div className="countdown-text">
-          {/* Display countdown timer if seconds or minutes are greater than 0 */}
-
+        {/* Timer */}
+        <div className="mb-4">
           {seconds > 0 || minutes > 0 ? (
-            <p>
+            <p className="text-gray-600">
               Time Remaining:{" "}
-              <span style={{ fontWeight: 600 }}>
+              <span className="font-semibold">
                 {minutes < 10 ? `0${minutes}` : minutes}:
                 {seconds < 10 ? `0${seconds}` : seconds}
               </span>
             </p>
           ) : (
-            // Display if countdown timer reaches 0
-            <p>Didn't receive code?</p>
+            <p className="text-gray-500">Didn't receive code?</p>
           )}
-
-          {/* Button to resend OTP */}
-          <Button
-            disabled={seconds > 0 || minutes > 0}
-            style={{
-              color: seconds > 0 || minutes > 0 ? "#DFE3E8" : "#FF5630",
-            }}
-            onClick={resendOTP}
-          >
-            Resend OTP
-          </Button>
         </div>
 
-        {/* Button to submit OTP */}
-        <Button className="submit-btn" onClick={submitHandler}>SUBMIT</Button>
-      </Form>
-    </FormContainer>
+        {/* Resend Button */}
+        <button
+          onClick={resendOTP}
+          disabled={seconds > 0 || minutes > 0}
+          className={`mb-4 text-sm ${
+            seconds > 0 || minutes > 0
+              ? "text-gray-400 cursor-not-allowed"
+              : "text-red-500"
+          }`}
+        >
+          Resend OTP
+        </button>
+
+        {/* Submit Button */}
+        <button
+          onClick={submitHandler}
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+        >
+          {loading ? "Verifying..." : "Submit"}
+        </button>
+      </div>
+    </div>
   );
 };
 
