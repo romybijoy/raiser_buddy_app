@@ -46,6 +46,21 @@ const OrderSummary = () => {
     dispatch(validateCoupon({ code: couponCode }));
   };
 
+  // Delivery charge
+  const deliveryCharge = order?.totalPrice < 1000 ? 40 : 0;
+
+  // Coupon discount (apply ONLY on product price, not delivery)
+  const couponDiscount = coupon
+    ? (order?.totalDiscountedPrice * coupon.discount) / 100
+    : 0;
+
+  // Final total
+  const finalTotal =
+    (order?.totalDiscountedPrice || 0) + deliveryCharge - couponDiscount;
+
+  // Total savings
+  const totalSavings = (order?.discount || 0) + couponDiscount;
+
   return (
     <div className="space-y-6">
       {/* ADDRESS */}
@@ -113,6 +128,13 @@ const OrderSummary = () => {
                 <span className="text-green-600">-₹{order?.discount}</span>
               </div>
 
+              {coupon && (
+                <div className="flex justify-between">
+                  <span>Coupon ({coupon.discount}%)</span>
+                  <span className="text-green-600">-₹{couponDiscount}</span>
+                </div>
+              )}
+
               <div className="flex justify-between">
                 <span>Delivery</span>
                 {order?.totalPrice < 1000 ? (
@@ -122,11 +144,6 @@ const OrderSummary = () => {
                 )}
               </div>
             </div>
-
-            {/* SAVINGS */}
-            <p className="text-green-600 text-sm font-medium">
-              You saved ₹{order?.discount} on this order 🎉
-            </p>
 
             {/* COUPON */}
             <div>
@@ -152,21 +169,21 @@ const OrderSummary = () => {
               </form>
             </div>
 
+            {/* SAVINGS */}
+            <p className="text-green-600 text-sm font-medium">
+              You saved ₹{totalSavings} on this order 🎉
+            </p>
+
             {/* TOTAL */}
             <div className="flex justify-between font-semibold text-lg border-t pt-3">
               <span>Total</span>
-              <span className="text-green-600">
-                ₹
-                {coupon
-                  ? totalPrice - (totalPrice * coupon.discount) / 100
-                  : totalPrice}
-              </span>
+              <span className="text-green-600">₹{finalTotal}</span>
             </div>
 
             {/* CTA */}
             <button
               onClick={handlePayment}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition"
             >
               Place Order
             </button>

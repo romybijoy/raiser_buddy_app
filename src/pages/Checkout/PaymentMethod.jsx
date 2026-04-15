@@ -1,70 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
-import CartItem from "../Cart/CartItem";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchOrderById, codOrder } from "../../redux/slices/OrderSlice";
-import AddressCard from "../../components/address/AdreessCard";
-import { Form, Row, Col, Card } from "react-bootstrap";
 import { createPayment } from "../../redux/slices/PaymentSlice";
-
-// import useRazorpay from "react-razorpay";
+import { toast } from "react-toastify";
 
 import { motion } from "framer-motion";
-// import { createPayment } from "../../../Redux/Customers/Payment/Action";
 
 const PaymentMethod = () => {
   const { order } = useSelector((state) => state.order);
   const { coupon } = useSelector((state) => state.coupon);
-  const [orderData, setOrderData] = useState("");
-  const [method, setMethod] = useState("");
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const orderId = searchParams.get("order_id");
   const dispatch = useDispatch();
   const [paymentMethod, setPaymentMethod] = useState("");
-    const [totalPrice, setTotalPrice] = useState(0);
 
   const navigate = useNavigate();
 
-  // const { status, data, error, isFetching } = useQuery(
-  //   ["orders"],
-  //   fetchOrderById(orderId),
-  //   {staleTime: 6000}
-  // );
-
-  // dispatch(fetchOrderById(orderId));
   useEffect(() => {
-    const input = { orderId: Number(orderId) };
-    dispatch(fetchOrderById(input));
-    setOrderData(order);
-    if (order?.totalPrice < 1000) {
-      setTotalPrice(order?.totalDiscountedPrice + 40);
-    } else{
-    setTotalPrice(order?.totalDiscountedPrice);
-    }
-  }, [dispatch]);
-
-  // const Razorpay = useRazorpay();
+    dispatch(fetchOrderById({ orderId: Number(orderId) }));
+  }, [dispatch, orderId]);
 
   const handleRazorpayPayment = () => {
-    let value = 0;
-    if (coupon !== "") {
-      value = totalPrice * (coupon?.discount * 0.01);
-    } else {
-      value = totalPrice;
-    }
-
-    const data = { orderId: orderId, amount: value };
-
+    const data = { orderId: orderId, amount: finalTotal };
     dispatch(createPayment(data));
-
-    // const rzp = new Razorpay(options);
-    // rzp.open();
   };
 
   const handleCodPayment = () => {
-    alert("COD selected. Payment will be collected on delivery.");
+    toast.info("COD selected. Payment will be collected on delivery.");
     dispatch(codOrder({ id: orderId }));
     navigate("/home");
   };
@@ -78,6 +42,19 @@ const PaymentMethod = () => {
       alert("Please select a payment method.");
     }
   };
+
+  // Delivery charge
+  const deliveryCharge = order?.totalPrice < 1000 ? 40 : 0;
+
+  // Coupon discount (only on discounted price)
+  const couponDiscount =
+    coupon && order?.totalDiscountedPrice
+      ? Math.round((order.totalDiscountedPrice * coupon.discount) / 100)
+      : 0;
+
+  const finalTotal = order?.totalDiscountedPrice
+    ? Math.round(order.totalDiscountedPrice + deliveryCharge - couponDiscount)
+    : 0;
 
   return (
     <div className="space-y-5">
@@ -110,7 +87,7 @@ const PaymentMethod = () => {
                 <h3 className="font-semibold">Pay with Razorpay</h3>
                 <p>Secure payment with Razorpay</p>
               </motion.button>
-              {order?.totalDiscountedPrice < 1000 && (
+              {order?.totalPrice < 1000 && (
                 <motion.button
                   whileTap={{ scale: 1.1 }}
                   onClick={() => setPaymentMethod("COD")}
@@ -142,6 +119,13 @@ const PaymentMethod = () => {
                 <span>Discount</span>
                 <span className="text-green-700">-₹{order?.discount}</span>
               </div>
+
+              {coupon && (
+                <div className="flex justify-between">
+                  <span>Coupon ({coupon.discount}%)</span>
+                  <span className="text-green-700">-₹{couponDiscount}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Delivery Charges</span>
                 {order?.totalPrice < 1000 ? (
@@ -159,25 +143,18 @@ const PaymentMethod = () => {
               <hr />
               <div className="flex justify-between font-bold text-lg">
                 <span>Total Amount</span>
-                <span className="text-green-700">
-                  ₹{" "}
-                  {coupon !== ""
-                    ? totalPrice * (coupon?.discount * 0.01)
-                    : totalPrice}
-                </span>
+                <span className="text-green-700">₹{finalTotal}</span>
               </div>
             </div>
             <hr />
 
             <hr />
-            <Button
+            <button
               onClick={handlePayment}
-              variant="contained"
-              type="submit"
-              sx={{ padding: ".8rem 2rem", marginTop: "2rem", width: "100%" }}
+              className="w-full bg-green-500 text-white py-3 rounded-lg font-medium hover:bg-green-600 mt-4"
             >
               Confirm Order
-            </Button>
+            </button>
           </div>
         </div>
       </div>

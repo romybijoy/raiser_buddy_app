@@ -86,12 +86,12 @@ const Cart = () => {
                 <Button
                   onClick={() => navigate("/checkout?step=2")}
                   className="buy_btn"
-                  variant="contained"
                   type="submit"
                   style={{
                     padding: ".8rem 2rem",
                     marginTop: "2rem",
                     width: "100%",
+                    backgroundColor: "#4CAF50",
                   }}
                 >
                   Check Out

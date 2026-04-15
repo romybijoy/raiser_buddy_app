@@ -13,8 +13,10 @@ export default function Checkout() {
   const queryParams = new URLSearchParams(location.search);
   const step = Number(queryParams.get("step")) || 1;
 
+  const orderId = queryParams.get("order_id");
+
   const handleBack = () => {
-    navigate(`/checkout?step=${step - 1}`);
+    navigate(`/checkout?step=${step - 1}&order_id=${orderId}`);
   };
 
   return (
@@ -82,7 +84,7 @@ export default function Checkout() {
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border p-5">
         {step === 2 ? (
           <AddDeliveryAddressForm
-            handleNext={() => navigate("/checkout?step=3")}
+            handleNext={() => navigate(`/checkout?step=3&order_id=${orderId}`)}
           />
         ) : step === 4 ? (
           <PaymentMethod />

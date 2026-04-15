@@ -5,9 +5,14 @@ import { updateCartItem, removeCartItem } from "../../redux/slices/CartSlice";
 import { IconButton } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import { useNavigate } from "react-router-dom";
 
 const CartItem = ({ item, showButton, loading }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleNavigate = () => {
+    navigate(`/product/${item?.product?.productId}`);
+  };
 
   const handleRemoveItemFromCart = () => {
     const data = { cartItemId: item?.cartItemId };
@@ -21,7 +26,6 @@ const CartItem = ({ item, showButton, loading }) => {
     dispatch(updateCartItem(data));
   };
 
-  console.log(item)
   if (loading) {
     return <h2>Loading</h2>;
   }
@@ -29,9 +33,12 @@ const CartItem = ({ item, showButton, loading }) => {
   return (
     <div className="p-5 shadow-lg border rounded-md">
       <div className="flex items-center">
-        <div className="w-[5rem] h-[5rem] lg:w-[9rem] lg:h-[9rem] ">
+        <div
+          onClick={handleNavigate}
+          className="w-[5rem] h-[5rem] lg:w-[9rem] lg:h-[9rem] "
+        >
           <img
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-cover object-top cursor-pointer"
             src={item?.product.images[0]}
             alt=""
           />
@@ -51,7 +58,7 @@ const CartItem = ({ item, showButton, loading }) => {
           </div>
         </div>
       </div>
-      {showButton &&
+      {showButton && (
         <div className="lg:flex items-center lg:space-x-10 pt-4">
           <div className="flex items-center space-x-2 ">
             <IconButton
@@ -80,7 +87,7 @@ const CartItem = ({ item, showButton, loading }) => {
             </Button>
           </div>
         </div>
-      }
+      )}
     </div>
   );
 };
