@@ -255,6 +255,35 @@ export const resetPassword = createAsyncThunk(
   },
 );
 
+export const updateProfile = createAsyncThunk(
+  "user/updateProfile",
+  async (data, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(`${appConfig.ip}/user/update-profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        return rejectWithValue(errData.message);
+      }
+
+      const result = await res.json();
+      return result;
+
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 export const userDetail = createSlice({
   name: "app",
   initialState: {
@@ -384,7 +413,13 @@ export const userDetail = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message;
-      });
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+  state.currentUser = action.payload; 
+})
+.addCase(updateProfile.rejected, (state, action) => {
+  state.error = action.payload;
+});
   },
 });
 

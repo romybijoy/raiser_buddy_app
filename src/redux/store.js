@@ -11,6 +11,7 @@ import PaymentSlice from "./slices/PaymentSlice";
 import WishlistSlice from "./slices/WishlistSlice";
 import CouponSlice from "./slices/CouponSlice";
 import InvoiceSlice from "./slices/InvoiceSlice";
+import AddressSlice from "./slices/AddressSlice";
 
 const store = configureStore({
   reducer: {
@@ -27,6 +28,7 @@ const store = configureStore({
     wishlist: WishlistSlice,
     coupon: CouponSlice,
     invoices: InvoiceSlice,
+    address: AddressSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }).concat(

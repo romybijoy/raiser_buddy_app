@@ -24,6 +24,7 @@ const PaymentSuccess = React.lazy(
 );
 const WishList = React.lazy(() => import("../pages/Account/WishListScreen"));
 const Coupons = React.lazy(() => import("../pages/Account/Coupons"));
+const EditAddress = React.lazy(() => import("../pages/Account/EditAddress"));
 
 const Routers = () => {
   return (
@@ -109,6 +110,7 @@ const Routers = () => {
 
           {/* WISHLIST */}
           <Route path="wishlist" element={<WishList />} />
+          <Route path="/account/edit-address/:id" element={<EditAddress />} />
 
           {/* COUPONS */}
           <Route path="coupons" element={<Coupons />} />
