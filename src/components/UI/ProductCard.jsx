@@ -74,12 +74,11 @@ const ProductCard = ({ product, wishlist }) => {
       >
         <motion.img
           whileHover={{ scale: 1.05 }}
-          src={product?.images?.[0] || "/logo192.png"}
+          src={product?.images?.[0] || ""}
           alt={product.name}
           className="w-full h-full object-cover"
           onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/logo192.png";
+            e.target.style.display = "none";
           }}
         />
       </div>
