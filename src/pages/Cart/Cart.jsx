@@ -15,16 +15,16 @@ const Cart = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(showCart());
-    if (cartData?.totalPrice < 1000) {
-      setTotalPrice((cartData?.totalDiscountedPrice) + 40);
-      console.log(totalPrice);
-    }
-    else{
-    setTotalPrice(cartData?.totalDiscountedPrice);
-    }
-    console.log(totalPrice);
-  }, [dispatch]);
+  dispatch(showCart());
+}, [dispatch]);
+
+useEffect(() => {
+  if (!cartData) return;
+
+  const delivery = cartData.totalDiscountedPrice < 1000 ? 40 : 0;
+
+  setTotalPrice(cartData.totalDiscountedPrice + delivery);
+}, [cartData]);
 
   return (
     <Helmet title="Shop">

@@ -70,9 +70,9 @@ const Order = () => {
         {/* 🔹 RIGHT: ORDER LIST */}
         <div className="col-span-12 md:col-span-8 lg:col-span-7 space-y-4">
           {filteredOrders?.length > 0 ? (
-            filteredOrders.flatMap((order) =>
+            filteredOrders.flatMap((order,orderIndex) =>
               order?.orderItems?.map((item, i) => (
-                <OrderCard key={i} item={item} order={order} />
+                <OrderCard key={`${orderIndex}-${i}`} item={item} order={order} />
               )),
             )
           ) : (

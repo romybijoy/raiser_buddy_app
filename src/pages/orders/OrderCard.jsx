@@ -7,7 +7,7 @@ import StarIcon from "@mui/icons-material/Star";
 const OrderCard = ({ item, order }) => {
   const navigate = useNavigate();
 
-  // ✅ Format Date
+  // Format Date
   const formatDate = (date) => {
     if (!date) return "";
     return new Date(date).toLocaleDateString("en-US", {
@@ -16,7 +16,7 @@ const OrderCard = ({ item, order }) => {
     });
   };
 
-  // ✅ Status Colors
+  // Status Colors
   const statusColor = {
     PENDING: "bg-yellow-100 text-yellow-700",
     PLACED: "bg-blue-100 text-blue-700",
@@ -26,25 +26,29 @@ const OrderCard = ({ item, order }) => {
     CANCELLED: "bg-red-100 text-red-700",
   };
 
-  // ✅ Navigation
+  // Navigation
   const handleNavigate = () => {
-    if (order?.orderStatus === "PENDING") {
-      navigate(`/checkout?step=3&order_id=${order?.id}`);
+    console.log("Order clicked:", order);
+
+    if (!order?.id) {
+      console.error("Order ID missing");
+      return;
+    }
+
+    if (order.orderStatus === "PENDING") {
+      navigate(`/checkout?step=4&order_id=${order.id}`);
     } else {
-      navigate(`/account/order/${order?.id}`);
+      navigate(`/account/order/${order.id}`);
     }
   };
-
   return (
     <div className="p-5 bg-white border rounded-xl shadow-sm hover:shadow-md transition">
-
       {/* ORDER ID */}
       <p className="text-xs text-gray-500 mb-3 font-medium">
         ORDER ID - {order?.orderId}
       </p>
 
       <div className="flex justify-between items-start flex-wrap gap-4">
-
         {/* 🔹 LEFT: PRODUCT */}
         <div
           onClick={handleNavigate}
@@ -57,9 +61,7 @@ const OrderCard = ({ item, order }) => {
           />
 
           <div>
-            <p className="font-semibold text-gray-800">
-              {item?.product?.name}
-            </p>
+            <p className="font-semibold text-gray-800">{item?.product?.name}</p>
             <p className="text-sm text-gray-500">
               {item?.product?.category?.name}
             </p>
@@ -84,10 +86,12 @@ const OrderCard = ({ item, order }) => {
 
         {/* 🔹 DELIVERY INFO */}
         <div className="w-full md:w-[30%] space-y-2">
-
           {order?.orderStatus === "DELIVERED" ? (
             <div className="flex items-center text-green-600 text-sm font-medium">
-              <FiberManualRecordIcon sx={{ width: 12, height: 12 }} className="mr-2" />
+              <FiberManualRecordIcon
+                sx={{ width: 12, height: 12 }}
+                className="mr-2"
+              />
               Delivered On {formatDate(order?.deliveryDate)}
             </div>
           ) : (
@@ -117,9 +121,7 @@ const OrderCard = ({ item, order }) => {
               Rate & Review Product
             </div>
           )}
-
         </div>
-
       </div>
     </div>
   );

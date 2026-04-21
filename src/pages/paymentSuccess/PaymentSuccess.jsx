@@ -9,6 +9,7 @@ import AddressCard from "../../components/address/AdreessCard";
 const PaymentSuccess = () => {
   const [paymentId, setPaymentId] = useState("");
   const [paymentStatus, setPaymentStatus] = useState("");
+  const [isProcessed, setIsProcessed] = useState(false);
 
   const { orderId } = useParams();
   const dispatch = useDispatch();
@@ -20,24 +21,60 @@ const PaymentSuccess = () => {
     setPaymentStatus(params.get("razorpay_payment_link_status"));
   }, []);
 
-  useEffect(() => {
-    if (paymentId && paymentStatus === "paid") {
-      dispatch(updatePayment({ orderId, paymentId }));
-      dispatch(fetchOrderById({ orderId }));
-    }
-  }, [orderId, paymentId]);
 
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+
+  const paymentIdParam = params.get("razorpay_payment_id");
+
+  if (paymentIdParam && !isProcessed) {
+    dispatch(updatePayment({ orderId, paymentId: paymentIdParam }))
+      .unwrap()
+      .then(() => dispatch(fetchOrderById({ orderId })))
+      .finally(() => setIsProcessed(true));
+  } else if (!paymentIdParam && !isProcessed) {
+    dispatch(fetchOrderById({ orderId }));
+    setIsProcessed(true);
+  }
+}, [orderId, isProcessed]);
+
+  useEffect(() => {
+    if (paymentStatus === "failed") {
+      setIsProcessed(true);
+    }
+  }, [paymentStatus]);
+
+  if (!isProcessed || !order) {
+    return <div>Processing payment...</div>;
+  }
+
+  console.log(order?.orderStatus);
+  const getStep = () => {
+    switch (order?.orderStatus) {
+      case "PLACED":
+        return 1;
+      case "CONFIRMED":
+        return 2;
+      case "SHIPPED":
+        return 3;
+      case "OUT_FOR_DELIVERY":
+        return 4;
+      case "DELIVERED":
+        return 5;
+      default:
+        return 1;
+    }
+  };
   return (
     <div className="bg-gray-50 min-h-screen px-4 lg:px-20 py-8 space-y-6">
-
-      {/* ✅ SUCCESS MESSAGE */}
+      {/*  SUCCESS MESSAGE */}
       <div className="flex flex-col items-center justify-center text-center bg-white border rounded-xl shadow-sm p-6">
         <div className="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-2xl">
           ✔
         </div>
 
         <h2 className="text-xl font-semibold mt-3">
-          Payment Successful
+          {paymentId ? "Payment Successful" : "Order Placed Successfully"}
         </h2>
 
         <p className="text-gray-500 mt-1">
@@ -45,25 +82,24 @@ const PaymentSuccess = () => {
         </p>
       </div>
 
-      {/* ✅ ORDER TRACKER */}
+      {/*  ORDER TRACKER */}
       <div className="bg-white border rounded-xl shadow-sm p-5">
-        <OrderTraker activeStep={1} />
+        <OrderTraker orderStatus={order?.orderStatus} />
       </div>
 
-      {/* ✅ ADDRESS (ONLY ONCE) */}
+      {/*  ADDRESS (ONLY ONCE) */}
       <div className="bg-white border rounded-xl shadow-sm p-5">
         <h3 className="font-semibold mb-3">Delivery Address</h3>
-        <AddressCard address={order?.shippingAddress} />
+        <AddressCard address={order?.shippingAddress || {}} />
       </div>
 
-      {/* ✅ ORDER ITEMS */}
+      {/*  ORDER ITEMS */}
       <div className="space-y-4">
         {order?.orderItems?.map((item, index) => (
           <div
             key={index}
             className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white border rounded-xl shadow-sm p-4 hover:shadow-md transition"
           >
-
             {/* LEFT: PRODUCT */}
             <div className="flex items-center gap-4 w-full md:w-2/3">
               <img
@@ -78,20 +114,19 @@ const PaymentSuccess = () => {
                   Category: {item.product.category?.name}
                 </p>
                 <p className="font-semibold text-green-600">
-                  ₹{item.price}
+                  ₹{item.discountedPrice} × {item.quantity} = ₹
+                  {item.discountedPrice * item.quantity}
                 </p>
               </div>
             </div>
 
             {/* RIGHT: STATUS */}
             <div className="text-green-600 font-medium">
-              Order Confirmed
+              {order?.orderStatus}
             </div>
-
           </div>
         ))}
       </div>
-
     </div>
   );
 };

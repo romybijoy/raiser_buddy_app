@@ -40,7 +40,6 @@ const OrderDetails = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen px-4 lg:px-20 py-6 space-y-6">
-
       {/* DELIVERY ADDRESS */}
       <div className="bg-white rounded-xl shadow-sm border p-5">
         <h2 className="text-lg font-semibold mb-3">Delivery Address</h2>
@@ -49,19 +48,8 @@ const OrderDetails = () => {
 
       {/* ORDER TRACKER */}
       <div className="bg-white rounded-xl shadow-sm border p-5 flex flex-col lg:flex-row justify-between items-center gap-4">
-        
         <div className="w-full lg:w-3/4">
-          <OrderTraker
-            activeStep={
-              order?.orderStatus === "PLACED"
-                ? 1
-                : order?.orderStatus === "CONFIRMED"
-                ? 2
-                : order?.orderStatus === "SHIPPED"
-                ? 3
-                : 5
-            }
-          />
+          <OrderTraker orderStatus={order?.orderStatus} />
         </div>
 
         <div>
@@ -87,7 +75,6 @@ const OrderDetails = () => {
             key={index}
             className="bg-white rounded-xl shadow-sm border p-4 flex flex-col md:flex-row justify-between items-center gap-4"
           >
-
             {/* LEFT: PRODUCT */}
             <div className="flex items-center gap-4 w-full md:w-2/3">
               <img
@@ -98,12 +85,8 @@ const OrderDetails = () => {
 
               <div className="space-y-1">
                 <p className="font-medium">{item.product.name}</p>
-                <p className="text-sm text-gray-500">
-                  {item.product.desc}
-                </p>
-                <p className="font-semibold text-green-600">
-                  ₹{item.price}
-                </p>
+                <p className="text-sm text-gray-500">{item.product.desc}</p>
+                <p className="font-semibold text-green-600">₹{item.price}</p>
               </div>
             </div>
 
@@ -116,10 +99,7 @@ const OrderDetails = () => {
               }
               className="flex items-center gap-2 text-purple-600 cursor-pointer hover:underline"
             >
-              ⭐
-              <span className="text-sm font-medium">
-                Rate & Review
-              </span>
+              ⭐<span className="text-sm font-medium">Rate & Review</span>
             </div>
           </div>
         ))}

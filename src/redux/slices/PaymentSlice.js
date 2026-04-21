@@ -6,58 +6,50 @@ const token = localStorage.getItem("token");
 
 export const createPayment = createAsyncThunk(
   "createPayment",
-  async (data, { rejectWithValue }) => {
-    console.log("data", data);
-
+  async ({ orderId, useWallet }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${appConfig.ip}/payments/${data.orderId}/${data.amount}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        // body: JSON.stringify(data.address),
-      });
-      if (!response.ok) {
-        return rejectWithValue(response.status);
-      }
-     
-      const result = await response.json();
+      const response = await fetch(
+        `${appConfig.ip}/payments/${orderId}?useWallet=${useWallet}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      return result;
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Backend error:", data);
+        return rejectWithValue(data);
+      }
+
+      return data; 
+
     } catch (error) {
-      console.log(error);
-      return rejectWithValue(error);
+      localStorage.setItem("payment_error", error.message);
+      return rejectWithValue(error.message);
     }
   }
 );
 
-
-//read action
 export const updatePayment = createAsyncThunk(
   "updatePayment",
-  async (data, { rejectWithValue }) => {
-    console.log(data);
-    let response;
-
-    response = await fetch(
-      `${appConfig.ip}/payments?payment_id=${data.paymentId}&order_id=${data.orderId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
+  async ({ orderId, paymentId }, { rejectWithValue }) => {
     try {
-      const result = await response.json();
-      // console.log(result);
-      return result;
-    } catch (error) {
-      return rejectWithValue(error);
+      const res = await fetch(
+        `${appConfig.ip}/payments?payment_id=${paymentId}&order_id=${orderId}`,
+        {
+          method: "GET",
+        },
+      );
+
+      return await res.json();
+    } catch (err) {
+      return rejectWithValue(err);
     }
-  }
+  },
 );
 
 export const orderSlice = createSlice({
@@ -79,7 +71,7 @@ export const orderSlice = createSlice({
       .addCase(createPayment.fulfilled, (state, action) => {
         state.loading = false;
         state.payments = action.payload;
-        window.location.href= action.payload.payment_link_url;
+        window.location.href = action.payload.payment_link_url;
       })
       .addCase(createPayment.rejected, (state, action) => {
         state.loading = false;

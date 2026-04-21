@@ -12,15 +12,22 @@ export default function Checkout() {
 
   const queryParams = new URLSearchParams(location.search);
   const step = Number(queryParams.get("step")) || 1;
-
   const orderId = queryParams.get("order_id");
 
+  // 🔹 Safe Back Navigation
   const handleBack = () => {
-    navigate(`/checkout?step=${step - 1}&order_id=${orderId}`);
+    if (step <= 1) return;
+
+    if (step === 2) {
+      navigate("/cart");
+    } else {
+      navigate(`/checkout?step=${step - 1}&order_id=${orderId}`);
+    }
   };
 
   return (
     <div className="bg-gray-50 min-h-screen px-4 lg:px-20 py-6">
+
       {/* 🔹 STEPPER */}
       <div className="max-w-5xl mx-auto mb-6">
         <div className="flex items-center justify-between">
@@ -31,6 +38,7 @@ export default function Checkout() {
 
             return (
               <div key={index} className="flex-1 flex items-center">
+
                 {/* Circle */}
                 <div
                   className={`w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold
@@ -38,8 +46,8 @@ export default function Checkout() {
                       isCompleted
                         ? "bg-green-500 text-white"
                         : isActive
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-300 text-gray-600"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-300 text-gray-600"
                     }`}
                 >
                   {isCompleted ? "✓" : stepNumber}
@@ -52,8 +60,8 @@ export default function Checkout() {
                       isActive
                         ? "text-blue-600"
                         : isCompleted
-                          ? "text-green-600"
-                          : "text-gray-500"
+                        ? "text-green-600"
+                        : "text-gray-500"
                     }`}
                 >
                   {label}
@@ -82,15 +90,23 @@ export default function Checkout() {
 
       {/* 🔹 CONTENT */}
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border p-5">
-        {step === 2 ? (
-          <AddDeliveryAddressForm
-            handleNext={() => navigate(`/checkout?step=3&order_id=${orderId}`)}
-          />
-        ) : step === 4 ? (
-          <PaymentMethod />
-        ) : (
+
+        {/* STEP 2 → ADDRESS */}
+        {step === 2 && (
+          <AddDeliveryAddressForm />
+        )}
+
+        {/* STEP 3 → ORDER SUMMARY */}
+        {step === 3 && (
           <OrderSummary />
         )}
+
+        {/* STEP 4 → PAYMENT */}
+        {step === 4 && orderId && (
+          <PaymentMethod />
+        )}
+
+       
       </div>
     </div>
   );

@@ -5,10 +5,10 @@ const AddressCard = ({ address }) => {
     <div>
       {/* <h1 className="text-lg font-semibold py-4">Delivery Adress</h1> */}
       <div className="space-y-3">
-        <p className="font-semibold">{`${address?.house_name} ${address?.place}`}</p>
+        <p className="font-semibold">{`${address?.house_name  || "N/A"} ${address?.place  || "N/A"}`}</p>
 
         <p>
-          {`${address?.state} ${address?.country} ${address?.zipcode}`}
+          {`${address?.state  || "N/A"} ${address?.country  || "N/A"} ${address?.zipcode  || "N/A"}`}
         </p>
 
         <div className="space-y-1">

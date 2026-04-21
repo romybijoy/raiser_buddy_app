@@ -6,37 +6,31 @@ const token = localStorage.getItem("token");
 
 export const createOrder = createAsyncThunk(
   "createOrder",
-  async (data, { rejectWithValue }) => {
-    console.log("data", data);
-
+  async ({ address, couponCode, email, useWallet }, { rejectWithValue }) => {
     try {
       const response = await fetch(`${appConfig.ip}/orders/${email}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data.address),
+        body: JSON.stringify({
+          address,
+          couponCode,
+          useWallet,
+        }),
       });
-      if (!response.ok) {
-        return rejectWithValue(response.status);
-      }
-
-      console.log("created order - ", response);
 
       const result = await response.json();
 
-      if (result.id) {
-        data.navigate({ search: `step=3&order_id=${result.id}` });
-      }
+      console.log("created order - ", result); // ✅ DEBUG
 
-      return result;
+      return result; // ✅ ONLY RETURN DATA
     } catch (error) {
-      console.log(error);
       return rejectWithValue(error);
     }
-  }
+  },
 );
-
 
 export const createAddress = createAsyncThunk(
   "createAddress",
@@ -62,15 +56,13 @@ export const createAddress = createAsyncThunk(
       console.log(error);
       return rejectWithValue(error);
     }
-  }
+  },
 );
-
 
 //read action
 export const showOrder = createAsyncThunk(
   "showOrder",
   async (data, { rejectWithValue }) => {
-    console.log(data);
     let response;
 
     response = await fetch(
@@ -80,7 +72,7 @@ export const showOrder = createAsyncThunk(
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     try {
@@ -90,37 +82,35 @@ export const showOrder = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const codOrder = createAsyncThunk(
-  'codOrder',
+  "codOrder",
   async (data, { rejectWithValue, dispatch }) => {
-    console.log(data.id)
+    console.log(data.id);
     const response = await fetch(`${appConfig.ip}/orders/cod/${data.id}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    })
+    });
 
     try {
-      const result = await response.json()
-      console.log(result)
-      return result
+      const result = await response.json();
+      return result;
     } catch (error) {
-      return rejectWithValue(error)
+      return rejectWithValue(error);
     }
   },
-)
+);
 
 //read action
 export const getOrderHistory = createAsyncThunk(
   "getOrderHistory",
   async (data, { rejectWithValue }) => {
     let response;
-    console.log("dsdsfsfs", email);
     try {
       response = await fetch(`${appConfig.ip}/orders/user/${email}`, {
         method: "GET",
@@ -133,19 +123,17 @@ export const getOrderHistory = createAsyncThunk(
       // }
 
       const result = await response.json();
-      console.log(result);
       return result;
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //update action
 export const fetchOrderById = createAsyncThunk(
   "fetchOrderById",
   async (data, { rejectWithValue }) => {
-    console.log(data);
     const response = await fetch(`${appConfig.ip}/orders/${data.orderId}`, {
       method: "GET",
       headers: {
@@ -156,36 +144,36 @@ export const fetchOrderById = createAsyncThunk(
 
     try {
       const result = await response.json();
-      console.log(result);
       return result;
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 // cancel order
 export const cancelOrder = createAsyncThunk(
-  'cancelOrder',
+  "cancelOrder",
   async (data, { rejectWithValue }) => {
-    console.log(data)
-    const response = await fetch(`${appConfig.ip}/orders/cancel/${data.orderId}?user_id=${data.userId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `${appConfig.ip}/orders/cancel/${data.orderId}?user_id=${data.userId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       },
-    })
+    );
 
     try {
-      const result = await response.json()
-      console.log(result)
-      return result
+      const result = await response.json();
+      return result;
     } catch (error) {
-      return rejectWithValue(error)
+      return rejectWithValue(error);
     }
   },
-)
+);
 
 //delete action
 export const deleteOrder = createAsyncThunk(
@@ -206,7 +194,7 @@ export const deleteOrder = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 //update action
@@ -229,7 +217,7 @@ export const updateOrder = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 export const orderSlice = createSlice({
@@ -241,13 +229,14 @@ export const orderSlice = createSlice({
     searchData: [],
     count: 0,
     order: "",
-    address: ""
+    address: "",
   },
 
   reducers: {},
 
   extraReducers: (builder) => {
-    builder.addCase(createOrder.pending, (state) => {
+    builder
+      .addCase(createOrder.pending, (state) => {
         state.loading = true;
       })
       .addCase(createOrder.fulfilled, (state, action) => {
@@ -322,7 +311,7 @@ export const orderSlice = createSlice({
       .addCase(updateOrder.fulfilled, (state, action) => {
         state.loading = false;
         state.orders = state.orders.map((ele) =>
-          ele.id === action.payload.id ? action.payload : ele
+          ele.id === action.payload.id ? action.payload : ele,
         );
       })
       .addCase(updateOrder.rejected, (state, action) => {
@@ -347,12 +336,11 @@ export const orderSlice = createSlice({
       })
       .addCase(cancelOrder.fulfilled, (state, action) => {
         state.loading = false;
-        
       })
       .addCase(cancelOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload.message;
-      })
+      });
   },
 });
 

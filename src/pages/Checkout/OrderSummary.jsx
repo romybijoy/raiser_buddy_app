@@ -1,77 +1,82 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import CartItem from "../Cart/CartItem";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchOrderById } from "../../redux/slices/OrderSlice";
 import AddressCard from "../../components/address/AdreessCard";
+import { createOrder } from "../../redux/slices/OrderSlice";
 import { validateCoupon } from "../../redux/slices/CouponSlice";
 
 const OrderSummary = () => {
-  const { order } = useSelector((state) => state.order);
+  const { cartData } = useSelector((state) => state.cart);
   const { coupon } = useSelector((state) => state.coupon);
+  const { currentUser } = useSelector((state) => state.app);
 
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const orderId = searchParams.get("order_id");
-
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const address = location.state?.address;
 
   const [couponCode, setCouponCode] = useState("");
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [useWallet, setUseWallet] = useState(false);
 
-  // Fetch order
-  useEffect(() => {
-    dispatch(fetchOrderById({ orderId: Number(orderId) }));
-  }, [orderId]);
+  // ❗ If no address, go back
+  if (!address || !address.id) {
+    return (
+      <div className="text-center text-red-500">
+        No address selected. Please go back.
+      </div>
+    );
+  }
 
-  // Calculate total
-  useEffect(() => {
-    if (order) {
-      if (order.totalPrice < 1000) {
-        setTotalPrice(order.totalDiscountedPrice + 40);
-      } else {
-        setTotalPrice(order.totalDiscountedPrice);
-      }
-    }
-  }, [order]);
-
-  const handlePayment = () => {
-    navigate(`/checkout?step=4&order_id=${order?.id}`);
-  };
-
+  // 🔹 Apply coupon (only validate UI)
   const handleCoupon = (e) => {
     e.preventDefault();
     if (!couponCode) return;
     dispatch(validateCoupon({ code: couponCode }));
   };
 
-  // Delivery charge
-  const deliveryCharge = order?.totalPrice < 1000 ? 40 : 0;
+  const handlePlaceOrder = async () => {
+    try {
 
-  // Coupon discount (apply ONLY on product price, not delivery)
+      console.log(address)
+      const res = await dispatch(createOrder({ address, couponCode, email: currentUser?.email, useWallet })).unwrap();
+
+      console.log("Order response:", res);
+      navigate(`/checkout?step=4&order_id=${res.id}&useWallet=${useWallet}`);
+    } catch (err) {
+      console.error("Order creation failed", err);
+      alert("Something went wrong");
+    }
+  };
+
+  const deliveryCharge = cartData?.totalDiscountedPrice < 1000 ? 40 : 0;
+
   const couponDiscount = coupon
-    ? (order?.totalDiscountedPrice * coupon.discount) / 100
+    ? (cartData?.totalDiscountedPrice * coupon.discount) / 100
     : 0;
 
-  // Final total
   const finalTotal =
-    (order?.totalDiscountedPrice || 0) + deliveryCharge - couponDiscount;
+    (cartData?.totalDiscountedPrice || 0) + deliveryCharge - couponDiscount;
 
-  // Total savings
-  const totalSavings = (order?.discount || 0) + couponDiscount;
+ const walletBalance = currentUser?.walletBalance ?? 0;
+
+const walletUsed = useWallet
+  ? Math.min(walletBalance, finalTotal)
+  : 0;
+
+  const finalPayable = finalTotal - walletUsed;
 
   return (
     <div className="space-y-6">
       {/* ADDRESS */}
-      <div className="bg-white border rounded-xl shadow-sm p-5 hover:shadow-md transition">
-        <AddressCard address={order?.shippingAddress} />
+      <div className="bg-white border rounded-xl shadow-sm p-5">
+        <AddressCard address={address} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LEFT: ITEMS */}
+        {/* ITEMS */}
         <div className="lg:col-span-2 space-y-4">
-          {order?.orderItems?.map((item, index) => (
+          {cartData?.cartItems?.map((item, index) => (
             <div
               key={index}
               className="flex gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition"
@@ -79,7 +84,7 @@ const OrderSummary = () => {
               {/* IMAGE */}
               <img
                 src={item?.product?.images?.[0] || "/placeholder.png"}
-                alt=""
+                alt={item?.product?.name}
                 className="w-24 h-24 object-cover rounded-lg border"
               />
 
@@ -87,22 +92,33 @@ const OrderSummary = () => {
               <div className="flex flex-col justify-between">
                 <div>
                   <h3 className="font-semibold text-gray-800">
-                    {item.product.name}
+                    {item?.product?.name}
                   </h3>
+
                   <p className="text-sm text-gray-500">
-                    {item.product.category?.name}
+                    {item?.product?.category?.name}
                   </p>
                 </div>
 
+                {/* PRICE */}
                 <div className="flex items-center gap-2">
                   <span className="line-through text-gray-400 text-sm">
-                    ₹{item.product.price}
+                    ₹{item?.product?.price}
                   </span>
-                  <span className="font-semibold text-lg">₹{item.price}</span>
+
+                  <span className="font-semibold text-lg">
+                    ₹{item?.product?.specialPrice}
+                  </span>
+
                   <span className="text-green-600 text-sm">
-                    {item.product.discount}% off
+                    {item?.product?.discount}% off
                   </span>
                 </div>
+
+                <p className="text-sm text-gray-500">
+                  ₹{item.product.specialPrice} × {item.quantity} = ₹
+                  {item.product.specialPrice * item.quantity}
+                </p>
 
                 <p className="text-xs text-gray-500">
                   Expected delivery in 2–3 days
@@ -112,82 +128,83 @@ const OrderSummary = () => {
           ))}
         </div>
 
-        {/* RIGHT: PRICE DETAILS */}
-        <div className="sticky top-24 h-fit">
-          <div className="bg-white border border-gray-200 shadow-md rounded-xl p-5 space-y-4">
-            <h3 className="font-semibold text-gray-700">Price Details</h3>
+        {/* PRICE */}
+        <div className="bg-white border shadow-md rounded-xl p-5 space-y-4">
+          <h3 className="font-semibold">Price Details</h3>
 
-            <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Price ({cartData?.totalItem} items)</span>
+              <span>₹{cartData?.totalPrice}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Discount</span>
+              <span className="text-green-600">-₹{cartData?.discount}</span>
+            </div>
+
+            {coupon && (
               <div className="flex justify-between">
-                <span>Price ({order?.totalItem} items)</span>
-                <span>₹{order?.totalPrice}</span>
+                <span>Coupon ({coupon.discount}%)</span>
+                <span className="text-green-600">-₹{couponDiscount}</span>
               </div>
+            )}
 
+            {useWallet && (
               <div className="flex justify-between">
-                <span>Discount</span>
-                <span className="text-green-600">-₹{order?.discount}</span>
+                <span>Wallet Used</span>
+                <span className="text-green-600">-₹{walletUsed}</span>
               </div>
+            )}
 
-              {coupon && (
-                <div className="flex justify-between">
-                  <span>Coupon ({coupon.discount}%)</span>
-                  <span className="text-green-600">-₹{couponDiscount}</span>
-                </div>
+            <div className="flex justify-between">
+              <span>Delivery</span>
+              {deliveryCharge > 0 ? (
+                <span>₹{deliveryCharge}</span>
+              ) : (
+                <span className="text-green-600">Free</span>
               )}
-
-              <div className="flex justify-between">
-                <span>Delivery</span>
-                {order?.totalPrice < 1000 ? (
-                  <span>₹40</span>
-                ) : (
-                  <span className="text-green-600">Free</span>
-                )}
-              </div>
             </div>
-
-            {/* COUPON */}
-            <div>
-              <p className="text-sm font-medium mb-2">Apply Coupon</p>
-
-              <form onSubmit={handleCoupon} className="flex gap-2 w-full">
-                <input
-                  type="text"
-                  placeholder="Enter code"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="flex-1 min-w-[120px] px-3 py-2 border rounded-lg 
-                 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-gray-800 text-white rounded-lg 
-                 hover:bg-black transition shrink-0"
-                >
-                  Apply
-                </button>
-              </form>
-            </div>
-
-            {/* SAVINGS */}
-            <p className="text-green-600 text-sm font-medium">
-              You saved ₹{totalSavings} on this order 🎉
-            </p>
-
-            {/* TOTAL */}
-            <div className="flex justify-between font-semibold text-lg border-t pt-3">
-              <span>Total</span>
-              <span className="text-green-600">₹{finalTotal}</span>
-            </div>
-
-            {/* CTA */}
-            <button
-              onClick={handlePayment}
-              className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition"
-            >
-              Place Order
-            </button>
           </div>
+
+          {/* COUPON */}
+          <form onSubmit={handleCoupon} className="flex gap-2">
+            <input
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              placeholder="Coupon"
+              className="border p-2 flex-1"
+            />
+            <button className="bg-black text-white px-2">Apply</button>
+          </form>
+
+          {/* WALLET */}
+          <label className="flex gap-2">
+            <input
+              type="checkbox"
+              checked={useWallet}
+               disabled={!currentUser?.walletBalance}
+              onChange={() => setUseWallet(!useWallet)}
+            />
+            Use Wallet ({" "}
+            {currentUser?.walletBalance > 0
+              ? `₹${currentUser?.walletBalance}`
+              : "₹0 available"}
+            )
+          </label>
+
+          <div className="flex justify-between font-semibold text-lg border-t pt-3">
+            <span>Total</span>
+            <span className="text-green-600">₹{finalPayable}</span>
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={handlePlaceOrder}
+            className="w-full bg-green-500 text-white py-3 rounded-lg"
+          >
+            Place Order
+          </button>
         </div>
       </div>
     </div>

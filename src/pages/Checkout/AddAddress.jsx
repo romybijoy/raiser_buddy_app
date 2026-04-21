@@ -1,18 +1,26 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { createOrder } from "../../redux/slices/OrderSlice";
+import { useSelector } from "react-redux";
 import AddressCard from "../../components/address/AdreessCard";
 
-export default function AddDeliveryAddressForm({ handleNext }) {
+export default function AddDeliveryAddressForm() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.app);
 
   const [selectedAddress, setSelectedAddress] = useState(null);
 
+  // 🔹 HANDLE ADDRESS SELECTION → GO TO SUMMARY
+  const handleProceed = () => {
+    if (!selectedAddress) return;
+    navigate("/checkout?step=3", {
+      state: { address: selectedAddress },
+    });
+  };
+
+  // 🔹 FORM SUBMIT → NEW ADDRESS
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const form = new FormData(e.target);
 
     const address = {
@@ -26,20 +34,15 @@ export default function AddDeliveryAddressForm({ handleNext }) {
       mobile: form.get("phoneNumber"),
     };
 
-    dispatch(createOrder({ address, navigate }));
-    handleNext();
-  };
-
-  const handleCreateOrder = (item) => {
-    dispatch(createOrder({ address: item, navigate }));
-    handleNext();
+    navigate("/checkout?step=3", {
+      state: { address },
+    });
   };
 
   return (
     <div className="bg-gray-50 min-h-screen p-4 lg:p-10">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        {/* LEFT: SAVED ADDRESSES */}
+        {/* 🔹 SAVED ADDRESSES */}
         <div className="bg-white rounded-xl shadow-sm border p-4 h-[32rem] overflow-y-auto">
           <h2 className="font-semibold text-lg mb-3">Saved Addresses</h2>
 
@@ -59,7 +62,11 @@ export default function AddDeliveryAddressForm({ handleNext }) {
 
                 {selectedAddress?.add_id === item.add_id && (
                   <button
-                    onClick={() => handleCreateOrder(item)}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProceed();
+                    }}
                     className="mt-3 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
                   >
                     Deliver Here
@@ -72,25 +79,60 @@ export default function AddDeliveryAddressForm({ handleNext }) {
           )}
         </div>
 
-        {/* RIGHT: NEW ADDRESS FORM */}
+        {/* 🔹 NEW ADDRESS FORM */}
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="font-semibold text-lg mb-4">
-            Add New Address
-          </h2>
+          <h2 className="font-semibold text-lg mb-4">Add New Address</h2>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            <input name="house_name" placeholder="House Name / No." required className="input" />
-            <input name="place" placeholder="Place" required className="input" />
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <input
+              name="house_name"
+              placeholder="House Name / No."
+              required
+              className="input"
+            />
+            <input
+              name="place"
+              placeholder="Place"
+              required
+              className="input"
+            />
 
             <input name="city" placeholder="City" required className="input" />
-            <input name="district" placeholder="District" required className="input" />
+            <input
+              name="district"
+              placeholder="District"
+              required
+              className="input"
+            />
 
-            <input name="state" placeholder="State" required className="input" />
-            <input name="zip" placeholder="Zip Code" required className="input" />
+            <input
+              name="state"
+              placeholder="State"
+              required
+              className="input"
+            />
+            <input
+              name="zip"
+              placeholder="Zip Code"
+              required
+              className="input"
+            />
 
-            <input name="country" placeholder="Country" required className="input" />
-            <input name="phoneNumber" placeholder="Phone Number" required className="input" />
+            <input
+              name="country"
+              placeholder="Country"
+              required
+              className="input"
+            />
+            <input
+              name="phoneNumber"
+              placeholder="Phone Number"
+              required
+              className="input"
+            />
 
             <div className="md:col-span-2">
               <button
@@ -100,10 +142,8 @@ export default function AddDeliveryAddressForm({ handleNext }) {
                 Deliver Here
               </button>
             </div>
-
           </form>
         </div>
-
       </div>
     </div>
   );
