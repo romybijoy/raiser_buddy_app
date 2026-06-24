@@ -20,7 +20,7 @@ const OrderSummary = () => {
   const [useWallet, setUseWallet] = useState(false);
 
   // ❗ If no address, go back
-  if (!address || !address.id) {
+  if (!address || !address.add_id) {
     return (
       <div className="text-center text-red-500">
         No address selected. Please go back.
